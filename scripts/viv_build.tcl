@@ -1,5 +1,5 @@
-set HDL_PATH [lindex $argv 0]
-set PROJ_NAME [lindex [file split [pwd]] end]
+set PROJ_NAME [lindex $argv 0]
+set HDL_PATH [lindex $argv 1]
 
 create_project -part xc7z007sclg400-1 -force $PROJ_NAME
 set_property board_part digilentinc.com:cora-z7-07s:part0:1.1 [current_project]
