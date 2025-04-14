@@ -1,6 +1,10 @@
 # tool macros
-VIVADO := /tools/Xilinx/Vivado/2024.1/bin/vivado
-VITIS := /tools/Xilinx/Vitis/2024.1/bin/vitis
+VIV_BIN := /tools/Xilinx/Vivado/2024.1/bin
+VITIS_BIN := /tools/Xilinx/Vitis/2024.1/bin
+
+VIVADO := $(VIV_BIN)/vivado
+VITIS := $(VITIS_BIN)/vitis
+HW_SERVER := $(VIV_BIN)/hw_server
 
 project_name := image_comp_ps
 
@@ -45,3 +49,9 @@ clean:
 .PHONY: vitis_clean
 vitis_clean:
 	@rm -rf $(PS_OUTPUT_PATH) $(SW_SRC_PATH)/__pycache__/
+
+.PHONY: vitis_xsdb
+vitis_xsdb:
+	$(eval SCRIPTS_PATH_REL:=$(shell realpath --relative-to $(PS_OUTPUT_PATH) $(SCRIPTS_PATH)))
+	cd $(PS_OUTPUT_PATH); $(VITIS) -s $(SCRIPTS_PATH_REL)/vitis_xsdb.py $(HW_SERVER)
+	killall hw_server
