@@ -56,4 +56,5 @@ vitis_clean:
 vitis_xsdb:
 	$(eval SCRIPTS_PATH_REL:=$(shell realpath --relative-to $(PS_OUTPUT_PATH) $(SCRIPTS_PATH)))
 	cd $(PS_OUTPUT_PATH); $(VITIS) -s $(SCRIPTS_PATH_REL)/vitis_xsdb.py $(HW_SERVER)
-	killall hw_server
+	# killall hw_server
+	 taskkill /IM hw_server.exe /F
