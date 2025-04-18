@@ -2,6 +2,7 @@ import sys
 import subprocess
 import re
 import json
+from xsdb import *
 
 def start_hw_server(hw_server_path):
     cmd = hw_server_path + " -d -S"
@@ -19,4 +20,8 @@ def start_hw_server(hw_server_path):
 
     return properties_dict["TransportName"] + ":" + hostname + ":" + properties_dict["Port"]
 
-print(start_hw_server(sys.argv[1]))
+session = start_debug_session()
+session.connect(url=start_hw_server(sys.argv[1]))
+print(session.targets())
+
+# print(start_hw_server(sys.argv[1]))
