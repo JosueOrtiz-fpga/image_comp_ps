@@ -1,6 +1,8 @@
 # tool macros
-VIV_BIN := /tools/Xilinx/Vivado/2024.1/bin
-VITIS_BIN := /tools/Xilinx/Vitis/2024.1/bin
+# VIV_BIN := /tools/Xilinx/Vivado/2024.1/bin
+VIV_BIN := /c/AMD/Vivado/2024.1/bin
+# VITIS_BIN := /tools/Xilinx/Vitis/2024.1/bin
+VITIS_BIN := /c/AMD/Vitis/2024.1/bin
 
 VIVADO := $(VIV_BIN)/vivado
 VITIS := $(VITIS_BIN)/vitis

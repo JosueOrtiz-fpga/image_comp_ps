@@ -2,6 +2,7 @@ import sys
 import subprocess
 import re
 import json
+import time
 from xsdb import *
 
 def start_hw_server(hw_server_path):
@@ -17,11 +18,32 @@ def start_hw_server(hw_server_path):
     # hostname is returned with a trailing new line
     result = subprocess.run(["hostname"], capture_output=True, text=True)
     hostname = result.stdout.rstrip()
-
-    return properties_dict["TransportName"] + ":" + hostname + ":" + properties_dict["Port"]
+    
+    url = properties_dict["TransportName"] + ":" + hostname + ":" + properties_dict["Port"]
+    print(url)
+    return url
 
 session = start_debug_session()
 session.connect(url=start_hw_server(sys.argv[1]))
-print(session.targets())
 
+print("Session Started\n")
+print("Printing Targets\n")
+session.targets()
+
+session.targets(3)
+# session.rst(type='system')
+session.fpga(file="./lwip_echo_server/_ide/bitstream/image_comp_ps.bit")
+
+session.targets(2)
+session.targets()
+session.rst(type='cores')
+session.dow("./z7_echo_server_pform/zynq_fsbl/build/fsbl.elf")
+session.con()
+time.sleep(5)
+session.stop()
+session.dow('./lwip_echo_server/build/lwip_echo_server.elf')
+session.con()
+time.sleep(5)
+session.stop()
+# session.ta('-s', filter='name=~*A9*0')
 # print(start_hw_server(sys.argv[1]))
