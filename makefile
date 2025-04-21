@@ -38,7 +38,7 @@ platform:
 	$(eval SW_SRC_PATH_REL:=$(shell realpath --relative-to $(PS_OUTPUT_PATH) $(SW_SRC_PATH)))
 	$(eval SCRIPTS_PATH_REL:=$(shell realpath --relative-to $(PS_OUTPUT_PATH) $(SCRIPTS_PATH)))
 	$(eval PL_OUTPUT_PATH_REL:=$(shell realpath --relative-to $(PS_OUTPUT_PATH) $(PL_OUTPUT_PATH)))
-	cd $(PS_OUTPUT_PATH); $(VITIS) -s $(SCRIPTS_PATH_REL)/vitis_build.py $(project_name) $(SW_SRC_PATH_REL) $(PL_OUTPUT_PATH_REL)
+	cd $(PS_OUTPUT_PATH); $(VITIS) -s $(SCRIPTS_PATH_REL)/vitis_pform.py $(project_name) $(SW_SRC_PATH_REL) $(PL_OUTPUT_PATH_REL)
 
 .PHONY: app
 app:
@@ -47,8 +47,8 @@ app:
 	$(eval PL_OUTPUT_PATH_REL:=$(shell realpath --relative-to $(PS_OUTPUT_PATH) $(PL_OUTPUT_PATH)))
 	cd $(PS_OUTPUT_PATH); $(VITIS) -s $(SCRIPTS_PATH_REL)/vitis_app.py $(SW_SRC_PATH_REL)
 
-# .PHONY: debug
-# debug: $(TARGET_DEBUG)
+.PHONY: build
+build: clean makedir vivado platform app
 
 .PHONY: clean
 clean:

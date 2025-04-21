@@ -43,7 +43,7 @@ if not platform:
                                                 os = config.os_name,
                                                 cpu = config.cpu_name, 
                                                 no_boot_bsp = False)
-
+else: platform.clean()
 # ensure the domain exists
 domain_name = config.os_name + "_"+ config.cpu_name
 domain = get_domain(platform, domain_name)

@@ -42,8 +42,7 @@ session.stop()
 
 session.dow('./lwip_echo_server/build/lwip_echo_server.elf')
 session.con()
-time.sleep(5)
-session.stop()
-
-exit()
+time.sleep(1)
 vitis.dispose()
+exit()
+

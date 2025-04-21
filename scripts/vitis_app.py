@@ -40,7 +40,7 @@ if not comp:
                                        platform =platform_xpfm,
                                        domain = config.os_name + "_"+ config.cpu_name,
                                        template = config.template_name)
-
+else: comp.clean()
 # before building, add any user source files to the app project
 sw_src_path = str(sw_path) + "/src"
 if os.path.exists(sw_src_path): 
