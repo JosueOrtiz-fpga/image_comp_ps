@@ -6,6 +6,11 @@ import time
 import vitis
 from xsdb import *
 
+proj_name = sys.argv[1]
+sw_path = sys.argv[2]
+sys.path.append(sw_path) # config.py is in the sw_path
+import config
+
 def start_hw_server(hw_server_path):
     cmd = hw_server_path + " -d -S"
     result = subprocess.run(cmd, 
@@ -25,22 +30,22 @@ def start_hw_server(hw_server_path):
     return url
 
 session = start_debug_session()
-session.connect(url=start_hw_server(sys.argv[1]))
+session.connect(url=start_hw_server(sys.argv[3]))
 
 print("Session Started\n")
 print("Printing Targets\n")
 session.targets()
 
 session.targets(3)
-session.fpga(file="./lwip_echo_server/_ide/bitstream/image_comp_ps.bit")
+session.fpga(file=f"./{config.app_name}/_ide/bitstream/{proj_name}.bit")
 
 session.targets(2)
-session.dow("./z7_echo_server_pform/zynq_fsbl/build/fsbl.elf")
+session.dow(f"./{config.platform_name}/zynq_fsbl/build/fsbl.elf")
 session.con()
 time.sleep(5)
 session.stop()
 
-session.dow('./lwip_echo_server/build/lwip_echo_server.elf')
+session.dow(f"./{config.app_name}/build/{config.app_name}.elf")
 session.con()
 time.sleep(15)
 session.stop()

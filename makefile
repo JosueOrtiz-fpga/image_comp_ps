@@ -61,7 +61,8 @@ vitis_clean:
 
 .PHONY: vitis_xsdb
 vitis_xsdb:
+	$(eval SW_SRC_PATH_REL:=$(shell realpath --relative-to $(PS_OUTPUT_PATH) $(SW_SRC_PATH)))
 	$(eval SCRIPTS_PATH_REL:=$(shell realpath --relative-to $(PS_OUTPUT_PATH) $(SCRIPTS_PATH)))
-	cd $(PS_OUTPUT_PATH); $(VITIS) -s $(SCRIPTS_PATH_REL)/vitis_xsdb.py $(HW_SERVER)
+	cd $(PS_OUTPUT_PATH); $(VITIS) -s $(SCRIPTS_PATH_REL)/vitis_xsdb.py  $(project_name) $(SW_SRC_PATH_REL) $(HW_SERVER)
 	# killall hw_server
 	 taskkill /IM hw_server.exe /F
