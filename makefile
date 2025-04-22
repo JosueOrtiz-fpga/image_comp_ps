@@ -29,10 +29,10 @@ makedir:
 
 .PHONY: vivado
 vivado:
-	$(eval HDL_SRC_PATH_REL:=$(shell realpath --relative-to $(PL_OUTPUT_PATH) $(HDL_SRC_PATH)))
-	$(eval SCRIPTS_PATH_REL:=$(shell realpath --relative-to $(PL_OUTPUT_PATH) $(SCRIPTS_PATH)))
-	cd $(PL_OUTPUT_PATH); $(VIVADO) -mode batch -source $(SCRIPTS_PATH_REL)/viv_build.tcl -tclargs $(project_name) $(HDL_SRC_PATH_REL)
-
+	# $(eval HDL_SRC_PATH_REL:=$(shell realpath --relative-to $(PL_OUTPUT_PATH) $(HDL_SRC_PATH)))
+	# $(eval SCRIPTS_PATH_REL:=$(shell realpath --relative-to $(PL_OUTPUT_PATH) $(SCRIPTS_PATH)))
+	# cd $(PL_OUTPUT_PATH); $(VIVADO) -mode batch -source $(SCRIPTS_PATH_REL)/viv_build.tcl -tclargs $(project_name) $(HDL_SRC_PATH_REL)
+	cd $(PL_OUTPUT_PATH); cp ./$(project_name).runs/impl_1/*.bit ./
 .PHONY: platform
 platform:
 	$(eval SW_SRC_PATH_REL:=$(shell realpath --relative-to $(PS_OUTPUT_PATH) $(SW_SRC_PATH)))
@@ -63,6 +63,7 @@ vitis_clean:
 vitis_xsdb:
 	$(eval SW_SRC_PATH_REL:=$(shell realpath --relative-to $(PS_OUTPUT_PATH) $(SW_SRC_PATH)))
 	$(eval SCRIPTS_PATH_REL:=$(shell realpath --relative-to $(PS_OUTPUT_PATH) $(SCRIPTS_PATH)))
-	cd $(PS_OUTPUT_PATH); $(VITIS) -s $(SCRIPTS_PATH_REL)/vitis_xsdb.py  $(project_name) $(SW_SRC_PATH_REL) $(HW_SERVER)
+	$(eval PL_OUTPUT_PATH_REL:=$(shell realpath --relative-to $(PS_OUTPUT_PATH) $(PL_OUTPUT_PATH)))
+	cd $(PS_OUTPUT_PATH); $(VITIS) -s $(SCRIPTS_PATH_REL)/vitis_xsdb.py  $(project_name) $(SW_SRC_PATH_REL) $(PL_OUTPUT_PATH_REL) $(HW_SERVER)													 
 	# killall hw_server
 	 taskkill /IM hw_server.exe /F

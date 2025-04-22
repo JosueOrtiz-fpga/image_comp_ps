@@ -3,11 +3,14 @@ import subprocess
 import re
 import json
 import time
+import glob
+from pathlib import Path
 import vitis
 from xsdb import *
 
 proj_name = sys.argv[1]
 sw_path = sys.argv[2]
+pl_output_path = sys.argv[3]
 sys.path.append(sw_path) # config.py is in the sw_path
 import config
 
@@ -30,14 +33,16 @@ def start_hw_server(hw_server_path):
     return url
 
 session = start_debug_session()
-session.connect(url=start_hw_server(sys.argv[3]))
+session.connect(url=start_hw_server(sys.argv[4]))
 
 print("Session Started\n")
 print("Printing Targets\n")
 session.targets()
 
 session.targets(3)
-session.fpga(file=f"./{config.app_name}/_ide/bitstream/{proj_name}.bit")
+bit_file_path = Path(pl_output_path).glob("*.bit") # returns a generator object
+bit_file = str(list(bit_file_path)[0]) #list converts generator to list of PosixPath entries)
+session.fpga(file=f"{bit_file}")
 
 session.targets(2)
 session.dow(f"./{config.platform_name}/zynq_fsbl/build/fsbl.elf")
