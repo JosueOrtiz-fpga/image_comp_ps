@@ -1,11 +1,10 @@
 import sys
+import os
 import subprocess
 import re
 import json
 import time
-import glob
 from pathlib import Path
-import vitis
 from xsdb import *
 
 proj_name = sys.argv[1]
@@ -39,20 +38,30 @@ print("Session Started\n")
 print("Printing Targets\n")
 session.targets()
 
-session.targets(3)
 bit_file_path = Path(pl_output_path).glob("*.bit") # returns a generator object
 bit_file = str(list(bit_file_path)[0]) #list converts generator to list of PosixPath entries)
-session.fpga(file=f"{bit_file}")
+if os.path.exists(bit_file):
+    session.targets(3)
+    print("Programming the FPGA with " + bit_file + "\n")
+    session.fpga(file=f"{bit_file}")
 
-session.targets(2)
-session.dow(f"./{config.platform_name}/zynq_fsbl/build/fsbl.elf")
-session.con()
-time.sleep(5)
-session.stop()
+fsbl_elf = f"./{config.platform_name}/zynq_fsbl/build/fsbl.elf"
+if os.path.exists(fsbl_elf):
+    session.targets(2)
+    print("Programming the FSBL " + fsbl_elf + "\n")
+    session.dow(fsbl_elf)
+    print("Running the FSBL " + fsbl_elf + "\n")
+    session.con()
+    time.sleep(5)
+    session.stop()
 
-session.dow(f"./{config.app_name}/build/{config.app_name}.elf")
-session.con()
-time.sleep(15)
-session.stop()
-vitis.dispose()
+app_elf = f"./{config.app_name}/build/{config.app_name}.elf"
+if os.path.exists(app_elf):
+    session.targets(2)
+    print("Programming the APP " + app_elf + "\n")
+    session.dow(app_elf)
+    print("Running the APP " + app_elf + "\n")
+    session.con()
+    time.sleep(15)
+    session.stop()
 

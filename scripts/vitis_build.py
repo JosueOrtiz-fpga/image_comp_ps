@@ -1,4 +1,6 @@
 import sys
+import os
+import time
 import vitis # AMD Vitis CLI package
 
 # sert path and name vars from command-line input
@@ -28,8 +30,15 @@ def lib_in_bsp(domain, lib_name):
         lib_names.append(dicts["name"])
     return (lib_name in lib_names)
 
-client = vitis.create_client()
-client.set_workspace(path="./")
+def get_platform_file(vitis_client, platform_dir):
+    platform_xpfm=vitis_client.find_platform_in_repos(platform_dir)
+    return platform_xpfm
+
+# previous vitis session may still hold a lock on the workspace
+while os.path.exists("./.rigel_lopper"):
+    time.sleep(1)
+
+client = vitis.create_client(workspace = "./")
 
 # the platform is the first component that needs to be created
 platform = get_component(client, config.platform_name)
@@ -63,6 +72,33 @@ if config.bsp_libs != None:
             print("Adding " + lib_name +" lib")
             domain.set_lib(lib_name=lib_name)
 platform.build()
+
+# Create the application that will run on the platform
+# If a app template is provided in config.py, check that it's valid
+if config.template_name != None:
+    embedded_temps = client.get_templates("EMBD_APP")
+    accel_temps = client.get_templates("ACCL_APP")
+    if not (config.template_name in embedded_temps + accel_temps):
+        vitis.dispose()
+        raise Exception("Invalid template name provided")
+    
+# need to retrieve the platofrm xpfm file for app creation reference
+platform_xpfm = get_platform_file(client, config.platform_name)
+
+comp = get_component(client, config.app_name)
+if not comp:
+    print("App " + config.app_name + " does not exist")
+    print("Creating the app")
+    comp = client.create_app_component(name=config.app_name,
+                                       platform =platform_xpfm,
+                                       domain = config.os_name + "_"+ config.cpu_name,
+                                       template = config.template_name)
+else: comp.clean()
+# before building, add any user source files to the app project
+sw_src_path = str(sw_path) + "/src"
+if os.path.exists(sw_src_path): 
+    comp.import_files(from_loc = sw_src_path, files=None, dest_dir_in_cmp="src")
+comp.build()
 
 # Finish
 vitis.dispose()
