@@ -8,15 +8,17 @@ VIVADO := $(VIV_BIN)/vivado
 VITIS := $(VITIS_BIN)/vitis
 HW_SERVER := $(VIV_BIN)/hw_server
 
-project_name := image_comp_ps
-
 # path macros
-HDL_SRC_PATH := hdl
+HDL_PATH := hdl
 SW_SRC_PATH := sw
 SCRIPTS_PATH := scripts
 
 PL_OUTPUT_PATH := build/pl/
 PS_OUTPUT_PATH := build/ps/
+
+# Project data
+PROJECT_NAME := image_comp_ps
+BOARD_PART := $(shell python -c "print("Hello")")
 
 # default rule
 default: build
@@ -29,16 +31,13 @@ makedir:
 
 .PHONY: vivado
 vivado:
-	$(eval HDL_SRC_PATH_REL:=$(shell realpath --relative-to $(PL_OUTPUT_PATH) $(HDL_SRC_PATH)))
-	$(eval SCRIPTS_PATH_REL:=$(shell realpath --relative-to $(PL_OUTPUT_PATH) $(SCRIPTS_PATH)))
-	cd $(PL_OUTPUT_PATH); $(VIVADO) -mode batch -source $(SCRIPTS_PATH_REL)/viv_build.tcl -tclargs $(project_name) $(HDL_SRC_PATH_REL)
-	cd $(PL_OUTPUT_PATH); cp ./$(project_name).runs/impl_1/*.bit ./
+	@echo $(BOARD_PART)
+	$(VIVADO) -mode batch -source $(SCRIPTS_PATH)/viv_build.tcl -tclargs $(PROJECT_NAME) $(HDL_PATH) $(PL_OUTPUT_PATH)
+	mv ./$(PL_OUTPUT_PATH)/$(PROJECT_NAME).runs/impl_1/*.bit ./$(PL_OUTPUT_PATH)
+	mv *.jou *.log $(PL_OUTPUT_PATH)
 .PHONY: vitis
 vitis:
-	$(eval SW_SRC_PATH_REL:=$(shell realpath --relative-to $(PS_OUTPUT_PATH) $(SW_SRC_PATH)))
-	$(eval SCRIPTS_PATH_REL:=$(shell realpath --relative-to $(PS_OUTPUT_PATH) $(SCRIPTS_PATH)))
-	$(eval PL_OUTPUT_PATH_REL:=$(shell realpath --relative-to $(PS_OUTPUT_PATH) $(PL_OUTPUT_PATH)))
-	cd $(PS_OUTPUT_PATH); $(VITIS) -s $(SCRIPTS_PATH_REL)/vitis_build.py $(SW_SRC_PATH_REL) $(PL_OUTPUT_PATH_REL)
+	$(VITIS) -s $(SCRIPTS_PATH)/vitis_build.py $(PS_OUTPUT_PATH) $(SW_SRC_PATH) $(PL_OUTPUT_PATH)
 
 .PHONY: build
 build: clean makedir vivado vitis
@@ -48,7 +47,7 @@ vitis_xsdb:
 	$(eval SW_SRC_PATH_REL:=$(shell realpath --relative-to $(PS_OUTPUT_PATH) $(SW_SRC_PATH)))
 	$(eval SCRIPTS_PATH_REL:=$(shell realpath --relative-to $(PS_OUTPUT_PATH) $(SCRIPTS_PATH)))
 	$(eval PL_OUTPUT_PATH_REL:=$(shell realpath --relative-to $(PS_OUTPUT_PATH) $(PL_OUTPUT_PATH)))
-	cd $(PS_OUTPUT_PATH); $(VITIS) -s $(SCRIPTS_PATH_REL)/vitis_xsdb.py  $(project_name) $(SW_SRC_PATH_REL) $(PL_OUTPUT_PATH_REL) $(HW_SERVER)													 
+	cd $(PS_OUTPUT_PATH); $(VITIS) -s $(SCRIPTS_PATH_REL)/vitis_xsdb.py  $(PROJECT_NAME) $(SW_SRC_PATH_REL) $(PL_OUTPUT_PATH_REL) $(HW_SERVER)													 
 	# killall hw_server
 	 taskkill /IM hw_server.exe /F
 
@@ -58,4 +57,4 @@ vitis_clean:
 
 .PHONY: clean
 clean:
-	@rm -rf $(PL_OUTPUT_PATH) $(PS_OUTPUT_PATH) $(SW_SRC_PATH)/__pycache__/
+	@rm -rf $(PL_OUTPUT_PATH) $(PS_OUTPUT_PATH)

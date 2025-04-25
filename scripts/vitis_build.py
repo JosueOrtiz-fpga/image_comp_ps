@@ -6,8 +6,9 @@ from pathlib import Path
 import vitis # AMD Vitis CLI package
 
 # set path and name vars from command-line input
-sw_path = sys.argv[1]
-pl_output_path = sys.argv[2]
+ps_output_path = sys.argv[1]
+sw_path = sys.argv[2]
+pl_output_path = sys.argv[3]
 
 def get_component(vitis_client, comp_name):
     try: comp = vitis_client.get_component(comp_name)
@@ -34,7 +35,7 @@ def get_platform_file(vitis_client, platform_dir):
 while os.path.exists("./.rigel_lopper"):
     time.sleep(1)
 
-client = vitis.create_client(workspace = "./")
+client = vitis.create_client(workspace = ps_output_path)
 
 # load config data 
 # Open and read the JSON file
