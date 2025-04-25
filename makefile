@@ -38,7 +38,7 @@ vitis:
 	$(eval SW_SRC_PATH_REL:=$(shell realpath --relative-to $(PS_OUTPUT_PATH) $(SW_SRC_PATH)))
 	$(eval SCRIPTS_PATH_REL:=$(shell realpath --relative-to $(PS_OUTPUT_PATH) $(SCRIPTS_PATH)))
 	$(eval PL_OUTPUT_PATH_REL:=$(shell realpath --relative-to $(PS_OUTPUT_PATH) $(PL_OUTPUT_PATH)))
-	cd $(PS_OUTPUT_PATH); $(VITIS) -s $(SCRIPTS_PATH_REL)/vitis_build.py $(project_name) $(SW_SRC_PATH_REL) $(PL_OUTPUT_PATH_REL)
+	cd $(PS_OUTPUT_PATH); $(VITIS) -s $(SCRIPTS_PATH_REL)/vitis_build.py $(SW_SRC_PATH_REL) $(PL_OUTPUT_PATH_REL)
 
 .PHONY: build
 build: clean makedir vivado vitis

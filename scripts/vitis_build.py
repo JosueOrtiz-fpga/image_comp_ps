@@ -1,17 +1,13 @@
 import sys
 import os
 import time
+import json
+from pathlib import Path
 import vitis # AMD Vitis CLI package
 
-# sert path and name vars from command-line input
-proj_name = sys.argv[1]
-sw_path = sys.argv[2]
-pl_output_path = sys.argv[3]
-
-xsa_file = pl_output_path + "/" + proj_name + ".xsa"
-sys.path.append(sw_path) # config.py is in the sw_path
-
-import config
+# set path and name vars from command-line input
+sw_path = sys.argv[1]
+pl_output_path = sys.argv[2]
 
 def get_component(vitis_client, comp_name):
     try: comp = vitis_client.get_component(comp_name)
@@ -40,34 +36,40 @@ while os.path.exists("./.rigel_lopper"):
 
 client = vitis.create_client(workspace = "./")
 
+# load config data 
+# Open and read the JSON file
+with open(f"{sw_path}/config.json", "r") as file:
+    config = json.load(file)
 # the platform is the first component that needs to be created
-platform = get_component(client, config.platform_name)
+xsa_file_path = Path(pl_output_path).glob("*.xsa") # returns a generator object
+xsa_file = str(list(xsa_file_path)[0]) #list converts generator to list of PosixPath entries)
+platform = get_component(client, config["platform_name"])
 if not platform:
-    print("Platform " + config.platform_name + " does not exist")
+    print("Platform " + config["platform_name"] + " does not exist")
     print("Creating the platform")
     # first step is to create the platform with details
     # from the config.py file
-    platform = client.create_platform_component(name = config.platform_name,
+    platform = client.create_platform_component(name = config["platform_name"],
                                                 hw_design = xsa_file,
-                                                os = config.os_name,
-                                                cpu = config.cpu_name, 
+                                                os = config["os_name"],
+                                                cpu = config["cpu_name"], 
                                                 no_boot_bsp = False)
 else: platform.clean()
 # ensure the domain exists
-domain_name = config.os_name + "_"+ config.cpu_name
+domain_name = config["os_name"] + "_"+ config["cpu_name"]
 domain = get_domain(platform, domain_name)
 if not domain:
     print("Domain " + domain_name + " does not exist")
     print("Creating the domain")
     domain = platform.add_domain(name = domain_name, 
-                                 cpu = config.cpu_name, 
+                                 cpu = config["cpu_name"], 
                                  os = config.os)
     
 # ensure the bsp libraries have been added
-if config.bsp_libs != None:
+if config["bsp_libs"] != None:
     print("User bsp_entries not empty")
     print("Checking if bsp_libs are already added")
-    for lib_name in config.bsp_libs:
+    for lib_name in config["bsp_libs"]:
         if not lib_in_bsp(domain, lib_name):
             print("Adding " + lib_name +" lib")
             domain.set_lib(lib_name=lib_name)
@@ -75,24 +77,24 @@ platform.build()
 
 # Create the application that will run on the platform
 # If a app template is provided in config.py, check that it's valid
-if config.template_name != None:
+if config["app_template"] != None:
     embedded_temps = client.get_templates("EMBD_APP")
     accel_temps = client.get_templates("ACCL_APP")
-    if not (config.template_name in embedded_temps + accel_temps):
+    if not (config["app_template"] in embedded_temps + accel_temps):
         vitis.dispose()
         raise Exception("Invalid template name provided")
     
 # need to retrieve the platofrm xpfm file for app creation reference
-platform_xpfm = get_platform_file(client, config.platform_name)
+platform_xpfm = get_platform_file(client, config["platform_name"])
 
-comp = get_component(client, config.app_name)
+comp = get_component(client, config["app_name"])
 if not comp:
-    print("App " + config.app_name + " does not exist")
+    print("App " + config["app_name"] + " does not exist")
     print("Creating the app")
-    comp = client.create_app_component(name=config.app_name,
+    comp = client.create_app_component(name=config["app_name"],
                                        platform =platform_xpfm,
-                                       domain = config.os_name + "_"+ config.cpu_name,
-                                       template = config.template_name)
+                                       domain = config["os_name"] + "_"+ config["cpu_name"],
+                                       template = config["app_template"])
 else: comp.clean()
 # before building, add any user source files to the app project
 sw_src_path = str(sw_path) + "/src"
