@@ -1,0 +1,8 @@
+{
+    "project_name": "image_comp_ps",
+    "board_part": "digilentinc.com:cora-z7-07s:part0:1.1",
+    "hdl_src": [
+        "z7_ps_bd_wrapper.v",
+        "test.vhdl"
+    ]
+}

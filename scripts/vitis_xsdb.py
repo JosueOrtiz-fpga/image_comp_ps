@@ -7,9 +7,11 @@ import time
 from pathlib import Path
 from xsdb import *
 
-proj_name = sys.argv[1]
+ps_output_path = sys.argv[1]
 sw_path = sys.argv[2]
 pl_output_path = sys.argv[3]
+hw_server_path = sys.argv[4]
+
 sys.path.append(sw_path) # config.py is in the sw_path
 import config
 
@@ -32,7 +34,7 @@ def start_hw_server(hw_server_path):
     return url
 
 session = start_debug_session()
-session.connect(url=start_hw_server(sys.argv[4]))
+session.connect(url=start_hw_server(hw_server_path))
 
 print("Session Started\n")
 print("Printing Targets\n")
