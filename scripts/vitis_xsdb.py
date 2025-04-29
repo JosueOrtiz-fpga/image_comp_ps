@@ -12,8 +12,7 @@ sw_path = sys.argv[2]
 pl_output_path = sys.argv[3]
 hw_server_path = sys.argv[4]
 
-sys.path.append(sw_path) # config.py is in the sw_path
-import config
+
 
 def start_hw_server(hw_server_path):
     cmd = hw_server_path + " -d -S"
@@ -47,7 +46,13 @@ if os.path.exists(bit_file):
     print("Programming the FPGA with " + bit_file + "\n")
     session.fpga(file=f"{bit_file}")
 
-fsbl_elf = f"./{config.platform_name}/zynq_fsbl/build/fsbl.elf"
+# load config data 
+# Open and read the JSON file
+with open(f"{sw_path}/config.json", "r") as file:
+    config = json.load(file)
+
+fsbl_elf = f"{ps_output_path}/{config['platform_name']}/zynq_fsbl/build/fsbl.elf"
+print(fsbl_elf)
 if os.path.exists(fsbl_elf):
     session.targets(2)
     print("Programming the FSBL " + fsbl_elf + "\n")
@@ -57,7 +62,7 @@ if os.path.exists(fsbl_elf):
     time.sleep(5)
     session.stop()
 
-app_elf = f"./{config.app_name}/build/{config.app_name}.elf"
+app_elf = f"{ps_output_path}/{config['app_name']}/build/{config['app_name']}.elf"
 if os.path.exists(app_elf):
     session.targets(2)
     print("Programming the APP " + app_elf + "\n")

@@ -18,17 +18,6 @@ SCRIPTS_PATH := scripts
 PL_OUTPUT_PATH := build/pl
 PS_OUTPUT_PATH := build/ps
 
-# Project data
-define get_pl_config
-    $(shell python -c "import json;\
-                       a='$(HDL_PATH)/config.json';\
-					   f=open(a);\
-					   print(json.load(f)['$(1)'])")
-endef
-# the return from python includes leading whitespace
-PROJECT_NAME := $(strip $(call get_pl_config,project_name))
-BOARD_PART := $(strip $(call get_pl_config,board_part))
-
 # default rule
 default: build
 
@@ -40,9 +29,9 @@ makedir:
 
 .PHONY: vivado
 vivado:
-	$(VIVADO) -mode batch -source $(SCRIPTS_PATH)/viv_build.tcl -tclargs $(PROJECT_NAME) $(BOARD_PART) $(HDL_PATH) $(PL_OUTPUT_PATH) $(PYTHON)
+	$(VIVADO) -mode batch -source $(SCRIPTS_PATH)/viv_build.tcl -tclargs $(HDL_PATH) $(PL_OUTPUT_PATH) $(PYTHON)
 	mv *.jou *.log $(PL_OUTPUT_PATH)
-	mv ./$(PL_OUTPUT_PATH)/$(PROJECT_NAME).runs/impl_1/*.bit ./$(PL_OUTPUT_PATH)
+	mv ./$(PL_OUTPUT_PATH)/*.runs/impl_1/*.bit ./$(PL_OUTPUT_PATH)
 
 .PHONY: vitis
 vitis:
@@ -53,7 +42,7 @@ build: clean makedir vivado vitis
 
 .PHONY: vitis_xsdb
 vitis_xsdb:
-	$(VITIS) -s $(SCRIPTS_PATH_REL)/vitis_xsdb.py  $(PS_OUTPUT_PATH) $(SW_SRC_PATH) $(PL_OUTPUT_PATH) $(HW_SERVER)
+	$(VITIS) -s $(SCRIPTS_PATH)/vitis_xsdb.py $(PS_OUTPUT_PATH) $(SW_SRC_PATH) $(PL_OUTPUT_PATH) $(HW_SERVER)
 	# killall hw_server
 	 taskkill /IM hw_server.exe /F
 
