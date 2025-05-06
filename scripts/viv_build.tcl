@@ -13,12 +13,10 @@ proc get_hdl_config_param {field_name} {
 
 # convert a Python list returned as a string to a TCL list
 proc jsonlist_2_list {json_list} {
-    # remove [] characters to avoid treating items as TCL commmands
-    set j_list_format [string trim $json_list "\[\]"]
     # convert string to list
-    set j_list_split [split $j_list_format ","]
+    set j_list_split [split $json_list ","]
     # remove other characters left over: space and '
-    foreach item $j_list_split { lappend result [string trim $item { '}]}
+    foreach item $j_list_split { lappend result [string trim $item { '[]}]}
     return $result
 }
 
@@ -27,6 +25,8 @@ set BOARD_PART [get_hdl_config_param "board_part"]
 set HDL_LIST [jsonlist_2_list [get_hdl_config_param "hdl_src"]]
 set BD_LIST [jsonlist_2_list [get_hdl_config_param "bd_src"]]
 
+puts $HDL_LIST
+puts $BD_LIST
 create_project -force $PROJ_NAME $PL_OUTPUT_PATH
 set_property board_part $BOARD_PART [current_project]
 
