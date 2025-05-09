@@ -16,15 +16,21 @@ def calc_2d_dct(input_matrix):
     dct2_t_mat_transpose = dct2_mat(8).T
     return np.dot(dct2_t_mat_transpose, np.dot(dct2_t_mat, input_matrix))
 
+# image reading
 img = cv2.imread("cameraman.tiff")
 height, width, depth = img.shape
 
+# image division into 8x8 blocks
 matrices = []
-# range stop index is exclusive: + 1 needed
 for i in range(0, (height+1) - 8, 8):
     for j in range(0, (width+1) - 8, 8):
         matrix = img[i:i + 8, j:j + 8]
         matrices.append(matrix)
+
+# dct of all 8x8 blocks
+dct_blocks = []
+for block in matrices:
+    dct_blocks.append(calc_2d_dct(block))
 
 # masking
 mask_matrix = np.zeros((8,8,3),img.dtype)
@@ -32,11 +38,10 @@ for m in range(0,4):
     for n in range(0,4-m):
         mask_matrix[m,n] = (1,1,1)
 
-print(mask_matrix)
-print(calc_2d_dct(matrices[0]))
-print("\n")
-print("------------------------------")
-print("\n")
-print(mask_matrix * calc_2d_dct(matrices[0]))
+dct_blocks_masked = []
+for block in dct_blocks:
+    dct_blocks_masked.append(block * mask_matrix)
+
+print(dct_blocks_masked[0])
 
 
