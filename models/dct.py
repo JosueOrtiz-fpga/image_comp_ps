@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 
 def dct2_mat(n):
-    mat = np.zeros((n,n),)
+    mat = np.zeros((n,n))
     for p in range(n):
         for q in range(n):
             if p ==0:
@@ -17,6 +17,10 @@ def calc_2d_dct(input_matrix):
     return np.dot(dct2_t_mat_transpose, np.dot(dct2_t_mat, input_matrix))
 
 img = cv2.imread("cameraman.tiff")
-cv2.imshow("Image", img)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+block0 = np.zeros((8,8,3), img.dtype)
+for m in range(8):
+    for n in range(8):
+        block0[m,n] = img[m,n]
+
+print(block0)
+
