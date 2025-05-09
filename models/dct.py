@@ -42,6 +42,24 @@ dct_blocks_masked = []
 for block in dct_blocks:
     dct_blocks_masked.append(block * mask_matrix)
 
-print(dct_blocks_masked[0])
+# inverse dct
+img2_blocks = []
+for block in dct_blocks_masked:
+    img2_blocks.append(calc_2d_dct(block))
+# cocnatenating
+num_blocks_row = int((width + 1)/8)
+num_rows = int((height + 1)/8)
+img2_rows_of_blocks = []
 
+# concatenate blocks into rows
+for i in range(num_rows):
+    img2_rows_of_blocks.append(np.concatenate(img2_blocks[0:num_blocks_row],axis=1))
 
+#concatenate rows into matrix
+img2 = np.concatenate(img2_rows_of_blocks, axis=0)
+print(img2.shape)
+
+# display
+cv2.imshow("Image", img2)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
