@@ -1,5 +1,5 @@
 import numpy as np
-import math
+import cv2
 
 def dct2_mat(n):
     mat = np.zeros((n,n),)
@@ -16,9 +16,7 @@ def calc_2d_dct(input_matrix):
     dct2_t_mat_transpose = dct2_mat(8).T
     return np.dot(dct2_t_mat_transpose, np.dot(dct2_t_mat, input_matrix))
 
-test_matrix = random_matrix = np.random.randint(0, 9, size=(8, 8))
-print(test_matrix)
-print("\n")
-print(calc_2d_dct(test_matrix))
-print("\n")
-print(calc_2d_dct(calc_2d_dct(test_matrix)))
+img = cv2.imread("cameraman.tiff")
+cv2.imshow("Image", img)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
