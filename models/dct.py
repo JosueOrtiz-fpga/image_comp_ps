@@ -22,5 +22,15 @@ for m in range(8):
     for n in range(8):
         block0[m,n] = img[m,n]
 
-print(block0)
+height, width, depth = img.shape
+matrices = []
+# range stop index is exclusive: + 1 needed
+for i in range(0, (height+1) - 8, 8):
+    for j in range(0, (width+1) - 8, 8):
+        matrix = img[i:i + 8, j:j + 8]
+        matrices.append(matrix)
+
+print(matrices[0])
+print(block0 == matrices[0])
+
 
