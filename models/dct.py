@@ -1,9 +1,24 @@
 import numpy as np
+import math
 
+def dct2_mat(n):
+    mat = np.zeros((n,n),)
+    for p in range(n):
+        for q in range(n):
+            if p ==0:
+                mat[p,q] = 1/np.sqrt(n)
+            else:
+                mat[p,q] = np.sqrt(2/n) * np.cos((np.pi*(2*q+1)*p)/(2*n))
+    return mat
 
-def dct_mat(n):
+def calc_2d_dct(input_matrix):
+    dct2_t_mat = dct2_mat(8)
+    dct2_t_mat_transpose = dct2_mat(8).T
+    return np.dot(dct2_t_mat_transpose, np.dot(dct2_t_mat, input_matrix))
 
-
-    return np.zeros((n,n))
-
-print(dct_mat(8))
+test_matrix = random_matrix = np.random.randint(0, 9, size=(8, 8))
+print(test_matrix)
+print("\n")
+print(calc_2d_dct(test_matrix))
+print("\n")
+print(calc_2d_dct(calc_2d_dct(test_matrix)))
