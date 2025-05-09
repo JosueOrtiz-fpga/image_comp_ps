@@ -17,12 +17,8 @@ def calc_2d_dct(input_matrix):
     return np.dot(dct2_t_mat_transpose, np.dot(dct2_t_mat, input_matrix))
 
 img = cv2.imread("cameraman.tiff")
-block0 = np.zeros((8,8,3), img.dtype)
-for m in range(8):
-    for n in range(8):
-        block0[m,n] = img[m,n]
-
 height, width, depth = img.shape
+
 matrices = []
 # range stop index is exclusive: + 1 needed
 for i in range(0, (height+1) - 8, 8):
@@ -30,7 +26,17 @@ for i in range(0, (height+1) - 8, 8):
         matrix = img[i:i + 8, j:j + 8]
         matrices.append(matrix)
 
-print(matrices[0])
-print(block0 == matrices[0])
+# masking
+mask_matrix = np.zeros((8,8,3),img.dtype)
+for m in range(0,4):
+    for n in range(0,4-m):
+        mask_matrix[m,n] = (1,1,1)
+
+print(mask_matrix)
+print(calc_2d_dct(matrices[0]))
+print("\n")
+print("------------------------------")
+print("\n")
+print(mask_matrix * calc_2d_dct(matrices[0]))
 
 
