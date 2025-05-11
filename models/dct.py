@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 import cv2
 
 def dct2_mat(n):
@@ -64,11 +65,12 @@ img= cv2.imread("cameraman.tiff",cv2.IMREAD_GRAYSCALE)
 height, width = img.shape
 
 matrices = img_2_blocks(img, 8)
-matrices2 = dct_blocks(dct_blocks(matrices))
-img2 = blocks_2_img(matrices2, height, width)
+print(calc_2d_dct(matrices[0]))
 
 # display
-cv2.imshow("Image 1", img)
-cv2.imshow("Image 2", img2)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+# cv2.imshow("Image 1", img)
+# cv2.imshow("Image 2", img2)
+# plt.imshow(img2, cmap='gray')
+# plt.show()
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
