@@ -55,6 +55,12 @@ def dct_blocks(blocks):
         blocks_tf.append(calc_2d_dct(block))
     return blocks_tf
 
+def idct_blocks(blocks):
+    blocks_tf = []
+    for block in blocks:
+        blocks_tf.append(calc_2d_idct(block))
+    return blocks_tf
+
 def mask(n, coef_num, mat):
     # generate mask
     height, width, depth = mat.shape
@@ -70,16 +76,18 @@ img= cv2.imread("cameraman.tiff",cv2.IMREAD_GRAYSCALE)
 height, width = img.shape
 
 matrices = img_2_blocks(img, 8)
-matrices2 = dct_blocks(dct_blocks(matrices))
-print(matrices[0])
-print(matrices2[0])
+matrices2 = idct_blocks(dct_blocks(matrices))
+img1 = blocks_2_img(matrices,height,width)
+img2 = blocks_2_img(matrices2,height, width)
 
+print(img1)
 print('\n')
-print(calc_2d_idct(calc_2d_dct(matrices[0])))
-# img2 = blocks_2_img(matrices2,height, width)
+print('\n')
+print('\n')
+print(img2)
 
-# #display
-# cv2.imshow("Image 1", img)
+#display
+# cv2.imshow("Image 1", img1)
 # cv2.imshow("Image 2", img2)
 # cv2.waitKey(0)
 # cv2.destroyAllWindows()
