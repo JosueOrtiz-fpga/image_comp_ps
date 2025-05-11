@@ -17,6 +17,11 @@ def calc_2d_dct(input_matrix):
     dct2_t_mat_transpose = dct2_t_mat.T
     return dct2_t_mat @ input_matrix @ dct2_t_mat_transpose
 
+def calc_2d_idct(input_matrix):
+    dct2_t_mat = dct2_mat(8)
+    dct2_t_mat_transpose = dct2_t_mat.T
+    return dct2_t_mat_transpose @ input_matrix @ dct2_t_mat
+
 def img_2_blocks(img, n):
     shape = img.shape
     if len(shape) == 3:
@@ -65,12 +70,16 @@ img= cv2.imread("cameraman.tiff",cv2.IMREAD_GRAYSCALE)
 height, width = img.shape
 
 matrices = img_2_blocks(img, 8)
-print(calc_2d_dct(matrices[0]))
+matrices2 = dct_blocks(dct_blocks(matrices))
+print(matrices[0])
+print(matrices2[0])
 
-# display
+print('\n')
+print(calc_2d_idct(calc_2d_dct(matrices[0])))
+# img2 = blocks_2_img(matrices2,height, width)
+
+# #display
 # cv2.imshow("Image 1", img)
 # cv2.imshow("Image 2", img2)
-# plt.imshow(img2, cmap='gray')
-# plt.show()
 # cv2.waitKey(0)
 # cv2.destroyAllWindows()
