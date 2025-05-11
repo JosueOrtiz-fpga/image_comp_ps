@@ -17,7 +17,11 @@ def calc_2d_dct(input_matrix):
     return np.dot(dct2_t_mat_transpose, np.dot(dct2_t_mat, input_matrix))
 
 def img_2_blocks(img, n):
-    height, width, depth = img.shape
+    shape = img.shape
+    if len(shape) == 3:
+        height, width, depth = img.shape
+    if len(shape) == 2:
+        height,width = img.shape
     matrices = []
     for i in range(0, (height+1) - n, n):
         for j in range(0, (width+1) - n, n):
@@ -39,6 +43,12 @@ def blocks_2_img(blocks, height, width):
     img2 = np.concatenate(img2_rows_of_blocks, axis=0)
     return img2
 
+def dct_blocks(blocks):
+    blocks_tf = []
+    for block in blocks:
+        blocks_tf.append(calc_2d_dct(block))
+    return blocks_tf
+
 def mask(n, coef_num, mat):
     # generate mask
     height, width, depth = mat.shape
@@ -50,13 +60,12 @@ def mask(n, coef_num, mat):
     return mat * mask_matrix
 
 # image reading
-img = cv2.imread("cameraman.tiff")
-height, width, depth = img.shape
+img= cv2.imread("cameraman.tiff",cv2.IMREAD_GRAYSCALE)
+height, width = img.shape
 
 matrices = img_2_blocks(img, 8)
-img2 = blocks_2_img(matrices, height, width)
-
-print(img2.shape)
+matrices2 = dct_blocks(dct_blocks(matrices))
+img2 = blocks_2_img(matrices2, height, width)
 
 # display
 cv2.imshow("Image 1", img)
