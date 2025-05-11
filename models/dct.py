@@ -14,8 +14,8 @@ def dct2_mat(n):
 
 def calc_2d_dct(input_matrix):
     dct2_t_mat = dct2_mat(8)
-    dct2_t_mat_transpose = dct2_mat(8).T
-    return np.dot(dct2_t_mat_transpose, np.dot(dct2_t_mat, input_matrix))
+    dct2_t_mat_transpose = dct2_t_mat.T
+    return dct2_t_mat @ input_matrix @ dct2_t_mat_transpose
 
 def img_2_blocks(img, n):
     shape = img.shape
