@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import cv2
 
 def dct2_mat(n):
@@ -61,6 +60,15 @@ def idct_blocks(blocks):
         blocks_tf.append(calc_2d_idct(block))
     return blocks_tf
 
+def float_2_int(input_matrix):
+    return input_matrix.astype(np.uint8)
+
+def int_blocks(blocks):
+    blocks_int = []
+    for block in blocks:
+        blocks_int.append(float_2_int(block))
+    return blocks_int
+
 def mask(n, coef_num, mat):
     # generate mask
     height, width, depth = mat.shape
@@ -76,7 +84,7 @@ img= cv2.imread("cameraman.tiff",cv2.IMREAD_GRAYSCALE)
 height, width = img.shape
 
 matrices = img_2_blocks(img, 8)
-matrices2 = idct_blocks(dct_blocks(matrices))
+matrices2 = int_blocks(idct_blocks(dct_blocks(matrices)))
 img1 = blocks_2_img(matrices,height,width)
 img2 = blocks_2_img(matrices2,height, width)
 
@@ -87,7 +95,7 @@ print('\n')
 print(img2)
 
 #display
-# cv2.imshow("Image 1", img1)
-# cv2.imshow("Image 2", img2)
-# cv2.waitKey(0)
-# cv2.destroyAllWindows()
+cv2.imshow("Image 1", img1)
+cv2.imshow("Image 2", img2)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
