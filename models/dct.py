@@ -126,26 +126,3 @@ def int_blocks(blocks):
     for block in blocks:
         blocks_int.append(block.astype(np.uint8))
     return blocks_int
-
-# def mask(n, coef_num, mat):
-#     # generate mask
-#     height, width, depth = mat.shape
-#     mask_matrix = np.zeros((height,width,depth),'unit8')
-#     for m in range(0,n):
-#         for n in range(0,n-m):
-#             mask_matrix[m,n] = (1,1,1)
-#     # apply mask
-#     return mat * mask_matrix
-
-# image reading
-src_img= cv2.imread("cameraman.tiff",cv2.IMREAD_GRAYSCALE)
-blocks = int_blocks(idct_blocks(dct_blocks(img_2_blocks(src_img, 8))))
-
-height, width = src_img.shape
-result_img = blocks_2_img(blocks,height, width)
-
-#display
-cv2.imshow("Image 1", src_img)
-cv2.imshow("Image 2", result_img)
-cv2.waitKey(0)
-cv2.destroyAllWindows()

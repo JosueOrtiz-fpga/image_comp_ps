@@ -62,9 +62,4 @@ def ycbcr_mat_2_rgb(mat):
             rgb_mat[m][n] = np.uint8(ycbcr_2_rgb(mat[m][n]))
     return rgb_mat
 
-test_mat = np.random.random_integers(50,255,(1,8,3))
-print(test_mat)
-print(rgb_mat_2_ycbcr(test_mat))
-print(ycbcr_mat_2_rgb(rgb_mat_2_ycbcr(test_mat)))
-
 
