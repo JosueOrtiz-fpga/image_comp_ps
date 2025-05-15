@@ -37,6 +37,23 @@ def vec_2_mat(shape, vec):
         mat[i] = vec[width*i: width*(i+1)]
     return mat
 
+def block_subsample(block):
+    """
+    Applies a 4:2:0 subsample to a 2 x 4 block of Y, Cb, or Cr components
+
+    Parameters:
+        block(np.ndarray) : a 2 x 4 matrix of Y, Cb, or Cr components
+    Returns:
+        subsample_block(np.ndarray): a subsampled 2 x 4 Y, Cb, or Cr block
+    """
+    samples = [block[0][0],block[0][2]]
+    subsample_block = np.zeros((2,4), dtype=np.uint8)
+    for i in range(2):
+        for j in range(4):
+            print(samples[int(j/2)])
+            subsample_block[i,j] = samples[int(j/2)]
+    return block_subsample
+
 def chroma_subsample_mat(mat):
     """
     Subsamples a matrix of YCbCr pixels using 4:2:0
@@ -46,14 +63,17 @@ def chroma_subsample_mat(mat):
     Returns:
         subsample_mat(np.ndarray): a subsampled YCbCr matrix
     """
-    height, width, depth = mat.shape
-    shape = (height,width)
     y_vec, cb_vec, cr_vec = separate_pixel_comps(mat)
 
-        
-    return (vec_2_mat(shape,y_vec), vec_2_mat(shape,cb_vec), vec_2_mat(shape,cr_vec))
+    shape= (mat.shape[0], mat.shape[1])
+    y_mat, cb_mat, cr_mat = (vec_2_mat(shape,y_vec), vec_2_mat(shape,cb_vec), vec_2_mat(shape,cr_vec))
 
-test_matrix = np.random.random_integers(50,255,(4,4,3))
+
+
+        
+    return y_mat, cb_mat, cr_mat
+
+test_matrix = np.random.random_integers(50,255,(2,4))
 print(test_matrix)
 print("-------------------")
-print(chroma_subsample_mat(test_matrix))
+print(block_subsample(test_matrix))
