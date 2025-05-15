@@ -1,5 +1,42 @@
 import numpy as np
 
+def separate_pixel_comps(mat):
+    """
+    Separate pixels in a matrix into their different components
+
+    Parameters:
+        mat(np.ndarray) : an n x n matrix of pixels with depth of 3
+    Returns:
+        pixels(tupple): a tupple with 3 list components containing pixel components
+    """
+    height, width, depth = mat.shape
+    y_vec = []
+    cb_vec = []
+    cr_vec = []
+    for row in mat:
+        for pixel in row:
+            y, cb, cr = pixel
+            y_vec.append(y)
+            cb_vec.append(cb)
+            cr_vec.append(cr)
+    return (y_vec, cb_vec, cr_vec)
+
+def vec_2_mat(shape, vec):
+    """
+    Returns a matrix comprised of components in input vector
+
+    Parameters:
+        shape(tupple) : (height (num of rows), width (num of cols))
+        vec(array)    : 1-D array of components
+    Returns:
+        mat(nd.array): matrix
+    """
+    mat = np.zeros(shape)
+    height, width = shape
+    for i in range(height):
+        mat[i] = vec[width*i: width*(i+1)]
+    return mat
+
 def chroma_subsample_mat(mat):
     """
     Subsamples a matrix of YCbCr pixels using 4:2:0
@@ -9,37 +46,14 @@ def chroma_subsample_mat(mat):
     Returns:
         subsample_mat(np.ndarray): a subsampled YCbCr matrix
     """
-    y_row = []
-    cb_row = []
-    cr_row = []
-    for row in mat:
-        y = []
-        cb = []
-        cr=[]
-        for pixel in row:
-            y.append(np.uint8(pixel[0]))
-            cb.append(np.uint8(pixel[1]))
-            cr.append(np.uint8(pixel[2]))
-        y_row.append(y)
-        
-        # cb_row.append(np.ndarray(cb))
-        # cr_row.append(np.ndarray(cr))
-    # print("-------------")
     height, width, depth = mat.shape
-    y_mat = np.zeros((height, width),mat.dtype)
-    for m in range(len(y_row)):
-        y_mat[m] = y_row[m]
-    print(mat)
-    print("-------------")
-    print(y_mat)
-    # y_mat = np.concatenate(y_row, axis=1)
-    # print(y_mat)
-    # cb_mat = np.concatenate(cb_row, axis=0)
-    # cr_mat = np.concatenate(cr_row, axis=0)
-    # print(mat)
-    # print("-------------")
-    # print(y_mat)
+    shape = (height,width)
+    y_vec, cb_vec, cr_vec = separate_pixel_comps(mat)
+
         
+    return (vec_2_mat(shape,y_vec), vec_2_mat(shape,cb_vec), vec_2_mat(shape,cr_vec))
 
-
-chroma_subsample_mat(np.random.random_integers(50,255,(3,4,3)))
+test_matrix = np.random.random_integers(50,255,(4,4,3))
+print(test_matrix)
+print("-------------------")
+print(chroma_subsample_mat(test_matrix))
