@@ -46,7 +46,7 @@ def block_subsample(block):
     Returns:
         subsample_block(np.ndarray): a subsampled 2 x 4 Y, Cb, or Cr block
     """
-    samples = [block[0][0],block[0][2]]
+    samples = [block[0,0],block[0,2]]
     subsample_block = np.zeros((2,4), dtype=np.uint8)
     for i in range(2):
         for j in range(4):
@@ -110,8 +110,32 @@ def chroma_subsample_mat(mat):
         
     return y_mat, cb_mat, cr_mat
 
-test_matrix = np.random.random_integers(50,255,(4,8))
+def pad_dims(shape):
+    """
+    Adjusts the dimensions of an image to be a multiple of 8 x 8 blocks
+
+    Parameters:
+        shape(tupple) : a (height,width) tupple
+    Returns:
+        adj_shape(tupple): an adjusted (height,width) tupple
+    """
+    adj_shape = []
+    for i in range(2):
+        if(shape[i] % 8 == 0): adj_shape.append(shape[i])
+        else: adj_shape.append(shape[i] + (8-shape[i]%8))
+    return tuple(adj_shape)
+
+shape = (10,10)
+shape = height, width = pad_dims(shape)
+test_matrix = np.random.random_integers(50,255,(height,width,3))
+y_vec, cb_vec, cr_vec = separate_pixel_comps(test_matrix)
+y_sub_mat = mat_subsample(vec_2_mat(shape,y_vec))
+cb_sub_mat = mat_subsample(vec_2_mat(shape,cb_vec))
+cr_sub_mat = mat_subsample(vec_2_mat(shape,cr_vec))
 print(test_matrix)
-print(mat_subsample(test_matrix))
-# test_matrix = np.random.random_integers(50,255,(2,4))
-# block_subsample_avg(test_matrix)
+print("---------------")
+print(y_sub_mat)
+print("\n")
+print(cb_sub_mat)
+print("\n")
+print(cr_sub_mat)
