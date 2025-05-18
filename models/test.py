@@ -1,6 +1,10 @@
 import numpy as np
-import color
 
+
+"""
+Color Tests
+"""
+import color
 def test_pixel_color_conv():
     """ Pixel Color Conversion Test"""
     test_pixels = [(0,0,0),(50, 100, 125),(255 , 255, 255)]
@@ -18,10 +22,13 @@ def test_img_color_conv():
             for t, r in zip(t_pixel,r_pixel):
                 # due to imprecision in conversion, values can be off by 1
                 assert(abs(t-r) <= 1)
-    
     print("image_color_conversion PASS")
 
-test_pixel_color_conv()
-test_img_color_conv()
 
 
+"""
+Subsampler Tests
+"""
+
+# test_pixel_color_conv()
+# test_img_color_conv()

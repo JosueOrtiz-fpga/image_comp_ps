@@ -1,42 +1,5 @@
 import numpy as np
 
-def separate_pixel_comps(mat):
-    """
-    Separate pixels in a matrix into their different components
-
-    Parameters:
-        mat(np.ndarray) : an n x n matrix of pixels with depth of 3
-    Returns:
-        pixels(tupple): a tupple with 3 list components containing pixel components
-    """
-    height, width, depth = mat.shape
-    y_vec = []
-    cb_vec = []
-    cr_vec = []
-    for row in mat:
-        for pixel in row:
-            y, cb, cr = pixel
-            y_vec.append(y)
-            cb_vec.append(cb)
-            cr_vec.append(cr)
-    return (y_vec, cb_vec, cr_vec)
-
-def vec_2_mat(shape, vec):
-    """
-    Returns a matrix comprised of components in input vector
-
-    Parameters:
-        shape(tupple) : (height (num of rows), width (num of cols))
-        vec(array)    : 1-D array of components
-    Returns:
-        mat(nd.array): matrix
-    """
-    mat = np.zeros(shape)
-    height, width = shape
-    for i in range(height):
-        mat[i] = vec[width*i: width*(i+1)]
-    return mat
-
 def block_subsample(block):
     """
     Applies a 4:2:0 subsample to a 2 x 4 block of Y, Cb, or Cr components
