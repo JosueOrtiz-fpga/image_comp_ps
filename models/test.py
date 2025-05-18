@@ -1,5 +1,12 @@
 import numpy as np
 
+def matrices_equal(exp, result):
+    """ Check if matrices are equal"""
+    if(exp.shape != result.shape):
+        raise Exception("Input matrices are not the same size")
+    for exp_row, result_row in zip(exp,result):
+            for e_n, r_n in zip(exp_row, result_row):
+                assert(e_n == r_n)
 
 """
 Color Tests
@@ -51,9 +58,7 @@ def test_block_sub_sample():
 
     # checkign each element in the arrays
     for test_block, result_block in zip(test_blocks, results):
-        for t_row, r_row in zip(test_block,result_block):
-            for t_n, r_n in zip(t_row, r_row):
-                assert(t_n == r_n)
+        matrices_equal(test_block, result_block)
     print("block_sub_sample PASS")    
 
 def test_block_sub_sample_avg():
@@ -75,12 +80,23 @@ def test_block_sub_sample_avg():
     
     # checkign each element in the arrays
     for test_block, result_block in zip(test_blocks, results):
-        for t_row, r_row in zip(test_block,result_block):
-            for t_n, r_n in zip(t_row, r_row):
-                assert(t_n == r_n)
+        matrices_equal(test_block, result_block)
     print("block_sub_sample_avg PASS")   
+
+def test_mat_subsample():
+    test_mat = np.random.randint(0,255,(4,4))
+    result = cs.mat_subsample(test_mat)
+
+    height, width = test_mat.shape
+    for m in range(0,height,2):
+        for n in range(0,width,2):
+            test_mat[m:m+2,n:n+2].fill(test_mat[m,n])
+    
+    matrices_equal(test_mat, result)
+    print("mat_subsample PASS")   
 
 test_pixel_color_conv()
 test_img_color_conv()
 test_block_sub_sample()
 test_block_sub_sample_avg()
+test_mat_subsample()

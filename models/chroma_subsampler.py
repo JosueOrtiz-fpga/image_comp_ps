@@ -38,6 +38,7 @@ def block_subsample_avg(block):
 def mat_subsample(mat):
     """
     Applies a 4:2:0 subsample to an n x n matrrix of Y, Cb, or Cr components
+    Input matrix must be padded to accomadate an integer number of 2 x 4 blocks
 
     Parameters:
         mat(np.ndarray) : an n x n matrix of Y, Cb, or Cr components
@@ -47,6 +48,10 @@ def mat_subsample(mat):
     block_h = 2
     block_w = 4
     height, width = mat.shape
+
+    if(height % 2 != 0 or width % 4 != 0): 
+        raise Exception("Input matrix must be padded to accomadate an integer number of 2 x 4 blocks")
+
     subsample_mat = np.zeros((height,width),mat.dtype)
     for m in range(0,height,block_h):
         for n in range(0,width,block_w):
