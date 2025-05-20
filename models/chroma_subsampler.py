@@ -1,42 +1,5 @@
 import numpy as np
 
-def separate_pixel_comps(mat):
-    """
-    Separate pixels in a matrix into their different components
-
-    Parameters:
-        mat(np.ndarray) : an n x n matrix of pixels with depth of 3
-    Returns:
-        pixels(tupple): a tupple with 3 list components containing pixel components
-    """
-    height, width, depth = mat.shape
-    y_vec = []
-    cb_vec = []
-    cr_vec = []
-    for row in mat:
-        for pixel in row:
-            y, cb, cr = pixel
-            y_vec.append(y)
-            cb_vec.append(cb)
-            cr_vec.append(cr)
-    return (y_vec, cb_vec, cr_vec)
-
-def vec_2_mat(shape, vec):
-    """
-    Returns a matrix comprised of components in input vector
-
-    Parameters:
-        shape(tupple) : (height (num of rows), width (num of cols))
-        vec(array)    : 1-D array of components
-    Returns:
-        mat(nd.array): matrix
-    """
-    mat = np.zeros(shape)
-    height, width = shape
-    for i in range(height):
-        mat[i] = vec[width*i: width*(i+1)]
-    return mat
-
 def block_subsample(block):
     """
     Applies a 4:2:0 subsample to a 2 x 4 block of Y, Cb, or Cr components
@@ -75,6 +38,7 @@ def block_subsample_avg(block):
 def mat_subsample(mat):
     """
     Applies a 4:2:0 subsample to an n x n matrrix of Y, Cb, or Cr components
+    Input matrix must be padded to accomadate an integer number of 2 x 4 blocks
 
     Parameters:
         mat(np.ndarray) : an n x n matrix of Y, Cb, or Cr components
@@ -84,6 +48,10 @@ def mat_subsample(mat):
     block_h = 2
     block_w = 4
     height, width = mat.shape
+
+    if(height % 2 != 0 or width % 4 != 0): 
+        raise Exception("Input matrix must be padded to accomadate an integer number of 2 x 4 blocks")
+
     subsample_mat = np.zeros((height,width),mat.dtype)
     for m in range(0,height,block_h):
         for n in range(0,width,block_w):
