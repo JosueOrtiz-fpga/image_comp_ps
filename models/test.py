@@ -139,9 +139,47 @@ def test_calc_2d_idct():
                     assert(abs(e_n - r_n) < 0.0001)
     print("test_calc_2d_idct PASS")
 
+"""
+RLE Tests
+"""
+import rle
+
+def test_rle():
+    test_array = np.random.randint(0,20,64)
+    expected = runLengthEncodingIterative(test_array)
+    result = rle.rle(test_array)
+    i = 0
+    for exp,result in zip(expected,result):
+        assert(exp==result)
+    print("test_rle PASS")
+
+# implementation found at https://www.geeksforgeeks.org/run-length-encoding-python/
+# countChar order changed
+# output format changed from string to list
+def runLengthEncodingIterative(input):
+    output = []
+    # We start with the first character
+    count = 1  
+    # Loop through the string starting from the second character
+    for i in range(1, len(input)):    
+       # If the current character is the same as the previous one
+        if input[i] == input[i - 1]: 
+            count += 1  # Increment the count
+        else:
+          	# Add previous character and its count to output
+            output.append(count)
+            output.append(input[i-1])
+            # Reset count for the new character
+            count = 1 
+    # After the loop, we still need to add the last character group
+    output.append(count)
+    output.append(input[i])
+    return output
+
 test_img_color_conv()
 test_block_sub_sample()
 test_block_sub_sample_avg()
 test_mat_subsample()
 test_calc_2d_dct()
 test_calc_2d_idct()
+test_rle()
