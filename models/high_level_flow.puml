@@ -1,0 +1,65 @@
+@startuml high_level_flow
+<style>
+activityDiagram {
+   FontColor white
+   FontSize 14
+   BackgroundColor #6BA46B
+}
+document {
+   BackgroundColor #36393F 
+}
+arrow {
+   FontColor white
+   FontSize 14
+   LineColor white
+   BackgroundColor white
+}
+diamond {
+   BackgroundColor #6C7B7F
+   FontColor black
+   FontSize 14
+}
+</style>
+
+
+start
+:RGB to YCbCr;
+split
+   -> Y;
+   :8x8 Block Division;
+   repeat
+      :2D DCT;
+      :Quantization;
+      :ZigZag Scan;
+      :DC Diff Pulse Code;
+      :AC Run Length Encode;
+      :Huffman Encode;
+   repeatwhile (all blocks \n   done?) is (no)
+split again
+   -> Cb;
+   :Chroma Subsampling;
+   :8x8 Block Division;
+   repeat
+      :2D DCT;
+      :Quantization;
+      :ZigZag Scan;
+      :DC Diff Pulse Code;
+      :AC Run Length Encode;
+      :Huffman Encode;
+   repeatwhile (all blocks \n   done?) is (no)
+split again
+   -> Cr;
+   :Chroma Subsampling;
+   :8x8 Block Division;
+   repeat
+      :2D DCT;
+      :Quantization;
+      :ZigZag Scan;
+      :DC Diff Pulse Code;
+      :AC Run Length Encode;
+      :Huffman Encode;
+   repeatwhile (all blocks \n   done?) is (no)
+end split
+:JPEG File Assembly;
+end
+@enduml
