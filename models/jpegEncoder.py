@@ -7,7 +7,9 @@ We'll build each component step by step.
 """
 
 import numpy as np
+import string
 from enum import Enum
+import cv2
 
 #---------------
 # Constants
@@ -106,7 +108,7 @@ class HuffmanTable:
         self.table_id = table_id
         self.huff_bits = huff_bits
         self.huff_vals = huff_vals
-        self.codes = self.gen_huff_dict(huff_bits, huff_vals)
+        self.codes = HuffmanTable.gen_huff_dict(huff_bits, huff_vals)
     
     @classmethod
     def std_luma_dc_table(cls):
@@ -209,6 +211,100 @@ class JPEGEncoder:
             ComponentType.CB: HuffmanTable.std_chroma_dc_table(),
             ComponentType.CR: HuffmanTable.std_chroma_dc_table(),
         }
+    def encode_raw_image(self, img: np.array):
+        """
+        Encode a raw RGB image \n
+        Args: img (np.array): raw RGB image
+        """
+        img_ycbcr = JPEGEncoder.rgb_2_ycbcr(img)
+
+        img_y, img_cb, img_cr = JPEGEncoder.split_img(img_ycbcr)
+
+        img_cb_sub = JPEGEncoder.chroma_subsample(img_cb,(4,2,2))
+        img_cr_sub = JPEGEncoder.chroma_subsample(img_cr,(4,2,2))
+
+        img_y_blocks = JPEGEncoder.divide_into_blocks(img_y)
+        img_cb_blocks = JPEGEncoder.divide_into_blocks(img_cb_sub)
+        img_cr_blocks = JPEGEncoder.divide_into_blocks(img_cr_sub)
+
+        img_y_blocks_enc = self.encode_blocks(img_y_blocks)
+        img_cb_blocks_enc = self.encode_blocks(img_cb_blocks)
+        img_cr_blocks_enc = self.encode_blocks(img_cr_blocks)
+
+        self.write_jpeg_file(img_y_blocks_enc, img_cb_blocks_enc, 
+                             img_cr_blocks_enc, "my_image.jpeg")
+    
+    @staticmethod
+    def rgb_2_ycbcr(img: np.array):
+        """
+        Encode a raw RGB image \n
+        Args: img (np.array): raw RGB image \n
+        Returns: img_ycbcr(np.array): image in YCBCR color space
+        """
+        return np.zeros(img.shape,np.uint8)
+    
+    @staticmethod
+    def split_img(img: np.array) -> tuple:
+        """
+        Splits a 3-D image into its 2-D component parts
+        Ex. an RGB image -> (R_img, G_img, B_img)
+
+        Args: img (np.array) : 3-D image \n
+        Returns: img_tuple (tuple): a tuple of 2-D image components
+        """
+        return (img[:,:,0], img[:,:,1], img [:,:,2])
+    
+    @staticmethod
+    def chroma_subsample(img_comp:np.array, sample_ratio: tuple):
+        """
+        Subsample a 2-D image \n
+        Args: 
+            img_comp (np.array): (assumed) Cb or Cr image
+            sample_ratio (tuple): 3 member tuple expressing sample ratio \n
+        Returns: img_comp_sub(np.array): subsampled image
+        """
+        return np.zeros(img_comp.shape, np.uint8)
+
+    @staticmethod
+    def divide_into_blocks(img_comp: np.array):
+        """
+        Divides a 2-D image into a list of 8 x 8 blocks \n
+        Args: img_comp (np.array): 2-D image \n
+        Returns: img_comp_block_list (np.array): list of 8 x 8 blocks
+        """
+
+        img_comp_block_list = []
+        for i in range(img_comp.shape[0]):
+            img_comp_block_list.append(np.zeros((8,8), np.uint8))
+        return img_comp_block_list
+    
+    def encode_blocks(self, img_comp_blocks: list):
+        """
+        Encodes a list of raw 8 x 8 blocks using JPEG compression
+        Args: 
+            self (JPEGEncoder)
+            img_comp_blocks (list): list of 8 x 8 YCbCr blocks\n
+        Returns: 
+            img_comp_blocks_enc (list): list of 1-D, huffman code arrays
+        """
+        img_comp_blocks_enc = []
+        for block in img_comp_blocks:
+            img_comp_blocks_enc.append(np.random.randint(0,255,64,np.uint8))
+        return img_comp_blocks_enc
+    
+    def write_jpeg_file(self, y_blocks_enc: list, cb_blocks_enc: list, 
+                        cr_blocks_enc: list, output_file: string):
+        """
+        Generate a jpeg image file
+        Args: 
+            self (JPEGEncoder)
+            y_blocks_enc (list): list of 1-D huffman code arrays for Luma (Y)
+            cb_blocks_enc (list): list of 1-D huffman code arrays for Chroma Blue (Cb)
+            cr_blocks_enc (list): list of 1-D huffman code arrays for Chroma Red (Cr)
+            output_file (String): path for output image file
+        """
+        image_array = np.random.randint(0, 255, size=(100, 100, 3), dtype=np.uint8)
+        cv2.imwrite(output_file, image_array)
 
 # Usage Example
 def main():
@@ -216,6 +312,7 @@ def main():
     
     # Create encoder
     encoder = JPEGEncoder(quality=85)
-
+    img = cv2.imread("airplane.bmp")
+    encoder.encode_raw_image(img)
 if __name__ == "__main__":
     main()
