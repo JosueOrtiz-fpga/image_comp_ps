@@ -131,16 +131,18 @@ STD_CHROMA_AC_HUFF_VALS = [
         0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa
     ]
 STD_CHROMA_AC_HUFF_DICT = gen_huff_dict(STD_CHROMA_AC_HUFF_BITS, STD_CHROMA_AC_HUFF_VALS)
+
 #---------------
 # DataTypes
 
-class ComponentType(Enum):
-    """Image component types"""
-    Y = "luminance"
-    CB = "chrominance_blue"
-    CR = "chrominance_red"
+t_comp = Enum('t_comp', [("Y", "Luma"), ("Cb", "Chroma_B"), ("Cr", "Chroma_R")])
 
-class coreEncoder:
+
+#----------
+# Core Encoder
+# ---------
+
+class CoreEncoder:
     def __init__(self, quality: int = 85):
         """
         Initialize JPEG encoder
@@ -152,27 +154,81 @@ class coreEncoder:
         
         # Initialize quantization tables
         self.quant_tables = {
-            ComponentType.Y: STD_LUMA_QUANT_TABLE,
-            ComponentType.CB: STD_CHROMA_QUANT_TABLE,
-            ComponentType.CR: STD_CHROMA_QUANT_TABLE
+            t_comp.Y: STD_LUMA_QUANT_TABLE,
+            t_comp.Cb: STD_CHROMA_QUANT_TABLE,
+            t_comp.Cr: STD_CHROMA_QUANT_TABLE
         }
         
         # Initialize Huffman tables
         self.huffman_dc_tables = {
-            ComponentType.Y: STD_LUMA_DC_HUFF_DICT,
-            ComponentType.CB: STD_CHROMA_DC_HUFF_DICT,
-            ComponentType.CR: STD_CHROMA_DC_HUFF_DICT
+            t_comp.Y: STD_LUMA_DC_HUFF_DICT,
+            t_comp.Cb: STD_CHROMA_DC_HUFF_DICT,
+            t_comp.Cr: STD_CHROMA_DC_HUFF_DICT
         }
         
         self.huffman_ac_tables = {
-            ComponentType.Y: STD_LUMA_AC_HUFF_DICT,
-            ComponentType.CB: STD_CHROMA_AC_HUFF_DICT,
-            ComponentType.CR: STD_CHROMA_AC_HUFF_DICT,
+            t_comp.Y: STD_LUMA_AC_HUFF_DICT,
+            t_comp.Cb: STD_CHROMA_AC_HUFF_DICT,
+            t_comp.Cr: STD_CHROMA_AC_HUFF_DICT,
         }
-    def encode_block(block:np.array) -> np.array:
+    def encode_block(self,block:np.array, block_type:t_comp) -> np.array:
         """
         Encode an 8 x 8 YCbCr block using JPEG compression
         Args: block(np.array) : 2-D array
         Returns: block_enc(np.array) : 1-D array
         """
+        if block.shape != (8,8):
+            raise TypeError("Input block must be an 8 x 8 matrix")
+        
+        block_dct = CoreEncoder.dct2(8, block)
+        block_dct_quant = self.quant(block_dct, block_type)
+        block_dct_quant_zz = self.zigzag_scan(block_dct_quant)
         return np.array(block).flatten("C")
+    
+    @staticmethod
+    def dct2(n:np.uint, block: np.array) -> np.array:
+        """
+        Perform the 2-D DCT of an n x n matrix
+        Args: 
+            n (np.uint): square dimension of block input
+            block (np.array): block input
+        Returns:
+            block_dct2 (np.array): 2D DCT of block input
+        """
+        if block.shape[0] != block.shape[1]:
+            raise TypeError("Input block must be a square matrix")
+        
+        t_matrix = dct2_mat(n)
+
+        return t_matrix @ block @ t_matrix.T
+    
+    def quant(self, block:np.array, block_type: t_comp) -> np.array:
+        """
+        Quantize a 8 x 8 block of Luma or Chroma DCT coefficients
+        Args:
+            block (np.array): 8 x 8 input block
+            block_type (t_comp): component type, Luma or Chroma
+        Return:
+            block_quant (np.array): 8 x 8 quantized block
+        """
+        return block // self.quant_tables[block_type]
+    
+    @staticmethod
+    def zigzag_scan(block : np.array) -> np.array:
+        """
+        Flattens and reorders a 2-D, 8 x 8 array\n
+        Args: block (np.array): 8 x 8 input block\n
+        Return: block_zz (np.array) : 1 x 64 array
+        """
+        index_order = np.array([
+            [0, 1, 5, 6,14,15,27,28],
+            [2, 4, 7,13,16,26,29,42],
+            [3, 8,12,17,25,30,41,43],
+            [9,11,18,24,31,40,44,53],
+            [10,19,23,32,39,45,52,54],
+            [20,22,33,38,46,51,55,60],
+            [21,34,37,47,50,56,59,61],
+            [35,36,48,49,57,58,62,63]
+            ]).flatten("C")
+        return block.flatten("C")[index_order]
+        

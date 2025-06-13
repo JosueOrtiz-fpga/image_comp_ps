@@ -7,7 +7,7 @@ We'll build each component step by step.
 """
 
 import numpy as np
-from coreEncoder import coreEncoder
+from coreEncoder import CoreEncoder,t_comp
 import string
 import cv2
 
@@ -29,7 +29,7 @@ class JPEGEncoder:
         Args:
             quality: JPEG quality factor (1-100, higher = better quality)
         """
-        self.encoding_core = coreEncoder(quality)
+        self.encoding_core = CoreEncoder(quality)
     def encode_raw_image(self, img: np.array):
         """
         Encode a raw RGB image \n
@@ -46,9 +46,9 @@ class JPEGEncoder:
         img_cb_blocks = JPEGEncoder.divide_into_blocks(img_cb_sub)
         img_cr_blocks = JPEGEncoder.divide_into_blocks(img_cr_sub)
 
-        img_y_blocks_enc = self.encode_blocks(img_y_blocks)
-        img_cb_blocks_enc = self.encode_blocks(img_cb_blocks)
-        img_cr_blocks_enc = self.encode_blocks(img_cr_blocks)
+        img_y_blocks_enc = self.encode_blocks(img_y_blocks, t_comp.Y)
+        img_cb_blocks_enc = self.encode_blocks(img_cb_blocks, t_comp.Cb)
+        img_cr_blocks_enc = self.encode_blocks(img_cr_blocks, t_comp.Cr)
 
         self.write_jpeg_file(img_y_blocks_enc, img_cb_blocks_enc, 
                              img_cr_blocks_enc, "my_image.jpeg")
@@ -171,7 +171,7 @@ class JPEGEncoder:
         img_comp_pad[0:orig_h, 0:orig_w] = img_comp[:,:]
         return img_comp_pad
     
-    def encode_blocks(self, img_comp_blocks: list) -> list:
+    def encode_blocks(self, img_comp_blocks: list, comp_type: t_comp) -> list:
         """
         Encodes a list of raw 8 x 8 blocks using JPEG compression
         Args: 
@@ -182,7 +182,7 @@ class JPEGEncoder:
         """
         img_comp_blocks_enc = []
         for block in img_comp_blocks:
-            img_comp_blocks_enc.append(coreEncoder.encode_block(block))
+            img_comp_blocks_enc.append(CoreEncoder.encode_block(block, comp_type))
         return img_comp_blocks_enc
     
     def write_jpeg_file(self, y_blocks_enc: list, cb_blocks_enc: list, 
