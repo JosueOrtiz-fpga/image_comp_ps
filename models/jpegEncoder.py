@@ -241,8 +241,24 @@ class JPEGEncoder:
         Args: img (np.array): raw RGB image \n
         Returns: img_ycbcr(np.array): image in YCBCR color space
         """
-        return np.zeros(img.shape,np.uint8)
-    
+        t_matrix = np.array([
+            [0.299, 0.587, 0.114],
+            [-0.169, -0.331, 0.5],
+            [0.5, -0.419, -0.081]
+        ])
+
+        t_matrix0 = np.array([
+            [0.299, 0.587, 0.114],
+            [-0.168736, -0.331264, 0.5],
+            [0.5, -0.418688, -0.081312]
+        ])
+
+        img_ycbcr = img @ t_matrix0.T
+
+        img_ycbcr[:,:,1:3] += 128  # Cb & Cr offset
+        img_ycbcr = np.round(np.clip(img_ycbcr, 0, 255))
+
+        return img_ycbcr.astype(np.uint8)
     @staticmethod
     def split_img(img: np.array) -> tuple:
         """
@@ -308,11 +324,7 @@ class JPEGEncoder:
 
 # Usage Example
 def main():
-    """Example of how to use the JPEG encoder"""
-    
-    # Create encoder
-    encoder = JPEGEncoder(quality=85)
     img = cv2.imread("airplane.bmp")
-    encoder.encode_raw_image(img)
+    print(JPEGEncoder.rgb_2_ycbcr(img))
 if __name__ == "__main__":
     main()

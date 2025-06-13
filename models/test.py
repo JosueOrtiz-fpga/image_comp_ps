@@ -1,185 +1,34 @@
+import unittest
 import numpy as np
-from scipy.fftpack import dct, idct
+import cv2
+from jpegEncoder import JPEGEncoder
 
-def matrices_equal(exp, result):
-    """ Check if matrices are equal"""
-    if(exp.shape != result.shape):
-        raise Exception("Input matrices are not the same size")
-    for exp_row, result_row in zip(exp,result):
-            for e_n, r_n in zip(exp_row, result_row):
-                try: assert(e_n == r_n)
-                except: raise Exception(f"{e_n} != {r_n}")
+class TestColorConvMethod(unittest.TestCase):
 
-"""
-Color Tests
-"""
-import color
-def test_pixel_color_conv():
-    """ Pixel Color Conversion Test"""
-    test_pixels = [(0,0,0),(50, 100, 125),(255 , 255, 255)]
-    for pixel in test_pixels:
-        result = color.ycbcr_2_rgb(color.rgb_2_ycbcr(pixel))
-        assert(result == pixel)
-    print("pixel_color_conversion PASS")
-
-def test_img_color_conv():
-    """ Image Color Conversion Test"""
-    test_img = np.random.randint(0,255,(256,256,3))
-    result = color.ycbcr_mat_2_rgb(color.rgb_mat_2_ycbcr(test_img))
-
-    # checkign each element in the arrays
-    for t_row,r_row in zip(test_img,result):
-        for t_pixel, r_pixel in zip(t_row, r_row):
-            for t, r in zip(t_pixel,r_pixel):
-                # due to imprecision in conversion, values can be off by 1
-                assert(abs(t-r) <= 1)
-    print("image_color_conversion PASS")
-
-
-
-"""
-Subsampler Tests
-"""
-import chroma_subsampler as cs
-def test_block_sub_sample():
-    """ Block SubSample Test """
-    num_bloks = 3
-    test_blocks  = []
-    for i in range(num_bloks):
-        test_blocks.append(np.random.randint(0,255,(2,4)))
+    def ycrcb_2_ycbcr(self, img:np.array):
+        img_ycbcr = np.zeros(img.shape, img.dtype)
+        img_ycbcr[:,:,0] = img[:,:,0]
+        img_ycbcr[:,:,1] = img[:,:,2]
+        img_ycbcr[:,:,2] = img[:,:,1]
+        return img_ycbcr
+    def test_blank(self):
+        blank_img = np.random.randint(255,256,(512,256,3),np.uint8)
+        img_exp = cv2.cvtColor(blank_img, cv2.COLOR_RGB2YCrCb)
+        img_res = JPEGEncoder.rgb_2_ycbcr(blank_img)
+        self.assertTrue(np.array_equal(img_exp,img_res))
     
-    results = []
-    for block in test_blocks:
-        results.append(cs.block_subsample(block))
+    def test_solid(self):
+        solid_img = np.random.randint(0,1,(256,256,3),np.uint8)
+        img_exp = cv2.cvtColor(solid_img, cv2.COLOR_RGB2YCrCb)
+        img_res = JPEGEncoder.rgb_2_ycbcr(solid_img)
+        self.assertTrue(np.array_equal(img_exp,img_res))
     
-    for block in test_blocks:
-        block[:,0:2].fill(block[0,0])
-        block[:,2:4].fill(block[0,2])
+    def test_rand(self):
+        rand_img = np.random.randint(0,256,(4,4,3), np.uint8)
+        img_exp = self.ycrcb_2_ycbcr(cv2.cvtColor(rand_img, cv2.COLOR_RGB2YCrCb))
+        img_res = JPEGEncoder.rgb_2_ycbcr(rand_img)
+        # convert to int16 to avoid underflow due to a -1 result from subtaction
+        self.assertTrue(np.all(np.abs(img_exp.astype(np.int16) - img_res.astype(np.int16)) <= 1))
 
-    # checkign each element in the arrays
-    for test_block, result_block in zip(test_blocks, results):
-        matrices_equal(test_block, result_block)
-    print("block_sub_sample PASS")    
-
-def test_block_sub_sample_avg():
-    """ Block SubSample Test """
-    num_bloks = 3
-    test_blocks  = []
-    for i in range(num_bloks):
-        test_blocks.append(np.random.randint(0,255,(2,4)))
-    
-    results = []
-    for block in test_blocks:
-        results.append(cs.block_subsample_avg(block))
-    
-    for block in test_blocks:
-        block[:,0:2].fill(np.mean(block[:,0:2]))
-        block[:,2:4].fill(np.mean(block[:,2:4]))
-    
-    # checkign each element in the arrays
-    for test_block, result_block in zip(test_blocks, results):
-        matrices_equal(test_block, result_block)
-    print("block_sub_sample_avg PASS")   
-
-def test_mat_subsample():
-    test_mat = np.random.randint(0,255,(4,4))
-    result = cs.mat_subsample(test_mat)
-
-    height, width = test_mat.shape
-    for m in range(0,height,2):
-        for n in range(0,width,2):
-            test_mat[m:m+2,n:n+2].fill(test_mat[m,n])
-    
-    matrices_equal(test_mat, result)
-    print("mat_subsample PASS")
-
-"""
-DCT Tests
-"""
-import dct as my_dct
-def test_calc_2d_dct():
-    """ 2D dct test"""
-    num_blocks = 3
-    test_mats = []
-    for i in range(num_blocks):
-        test_mats.append(np.random.randint(0,255,(8,8)))
-    
-    expects = []
-    for mat in test_mats:
-        expects.append(dct(dct(mat.T, norm='ortho').T, norm='ortho'))
-    
-    results = []
-    for mat in test_mats:
-        results.append(my_dct.calc_2d_dct(mat))
-   
-    for expected, result in zip(expects, results):
-        for exp_row, result_row in zip(expected,result):
-                for e_n, r_n in zip(exp_row, result_row):
-                    assert(abs(e_n - r_n) < 0.0001)
-    print("test_calc_2d_dct PASS")
-
-def test_calc_2d_idct():
-    """ 2D idct test"""
-    num_blocks = 3
-    test_mats = []
-    for i in range(num_blocks):
-        test_mats.append(np.random.randint(0,255,(8,8)))
-    
-    expects = []
-    for mat in test_mats:
-        expects.append(idct(idct(mat.T, norm='ortho').T, norm='ortho'))
-    
-    results = []
-    for mat in test_mats:
-        results.append(my_dct.calc_2d_idct(mat))
-   
-    for expected, result in zip(expects, results):
-        for exp_row, result_row in zip(expected,result):
-                for e_n, r_n in zip(exp_row, result_row):
-                    assert(abs(e_n - r_n) < 0.0001)
-    print("test_calc_2d_idct PASS")
-
-"""
-RLE Tests
-"""
-import rle
-
-def test_rle():
-    test_array = np.random.randint(0,20,64)
-    expected = runLengthEncodingIterative(test_array)
-    result = rle.rle(test_array)
-    i = 0
-    for exp,result in zip(expected,result):
-        assert(exp==result)
-    print("test_rle PASS")
-
-# implementation found at https://www.geeksforgeeks.org/run-length-encoding-python/
-# countChar order changed
-# output format changed from string to list
-def runLengthEncodingIterative(input):
-    output = []
-    # We start with the first character
-    count = 1  
-    # Loop through the string starting from the second character
-    for i in range(1, len(input)):    
-       # If the current character is the same as the previous one
-        if input[i] == input[i - 1]: 
-            count += 1  # Increment the count
-        else:
-          	# Add previous character and its count to output
-            output.append(count)
-            output.append(input[i-1])
-            # Reset count for the new character
-            count = 1 
-    # After the loop, we still need to add the last character group
-    output.append(count)
-    output.append(input[i])
-    return output
-
-test_img_color_conv()
-test_block_sub_sample()
-test_block_sub_sample_avg()
-test_mat_subsample()
-test_calc_2d_dct()
-test_calc_2d_idct()
-test_rle()
+if __name__ == '__main__':
+    unittest.main()
