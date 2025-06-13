@@ -327,19 +327,14 @@ class JPEGEncoder:
         # handle image padding
         if h % 8 != 0 or w % 8 != 0:
             img_comp_i = JPEGEncoder.pad_image_comp(img_comp)
-            # img_comp_i[0:h,0:w] = img_comp[:,:]
-            # print(h,w)
-            # img_comp_i[0:h,0:w] = 1
-            # if h % 8 != 0:
-            #     img_comp_i[h:-1] = img_comp_i[h]
-            # if w % 8 != 0:
-            #     img_comp_i[w:-1] = img_comp_i[w]
         else: img_comp_i = img_comp
 
-        # img_comp_block_list = []
-        # for i in range(img_comp.shape[0]):
-        #     img_comp_block_list.append(np.zeros((8,8), np.uint8))
-        return img_comp_i
+        h_new, w_new = img_comp_i.shape
+        img_comp_block_list = []
+        for m in range(0,h_new,8):
+            for n in range(0,w_new,8):
+                img_comp_block_list.append(img_comp_i[m:m+8, n:n+8])
+        return img_comp_block_list
     
     @staticmethod
     def pad_image_comp(img_comp:np.array) -> np.array:

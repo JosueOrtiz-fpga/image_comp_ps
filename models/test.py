@@ -1,6 +1,7 @@
 import unittest
 import numpy as np
 import cv2
+import math
 from jpegEncoder import JPEGEncoder
 
 class TestColorConvMethod(unittest.TestCase):
@@ -83,11 +84,9 @@ class TestChromaSubSampleMethod(unittest.TestCase):
 
 class TestDivideIntoBlocksMethod(unittest.TestCase):
     def test_divide_into_blocks(self):
-         rand_img = np.random.randint(0,256,(7,7), np.uint8)
+         rand_img = np.random.randint(0,256,(399,244), np.uint8)
          img_blocks = JPEGEncoder.divide_into_blocks(rand_img)
-         print(rand_img)
-         print(img_blocks)
-         print(img_blocks.shape)
+         self.assertEqual(len(img_blocks), math.ceil(rand_img.shape[0]/8)*math.ceil(rand_img.shape[1]/8))
 
     
 if __name__ == '__main__':
