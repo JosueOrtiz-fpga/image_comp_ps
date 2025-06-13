@@ -348,12 +348,13 @@ class JPEGEncoder:
         Args: img_comp(np.array): a 2-D image
         Returns: img_comp_pad(np.array): input image with padded dimensions
         """
-        h,w = img_comp.shape
+        orig_h, orig_w = h,w = img_comp.shape
         if h % 8 != 0:
             h = (h+(8-h%8))
         if w % 8 != 0:
             w = (w+(8-w%8))
         img_comp_pad = np.zeros((h,w), img_comp.dtype)
+        img_comp_pad[0:orig_h, 0:orig_w] = img_comp[:,:]
         return img_comp_pad
     
     def encode_blocks(self, img_comp_blocks: list):
