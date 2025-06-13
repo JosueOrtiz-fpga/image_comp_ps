@@ -307,12 +307,13 @@ class JPEGEncoder:
         if sample_ratio == (4,4,4): return block
 
         block_sub = np.zeros((2,4),block.dtype)
-        # first row will only support half-subsampling
-        block_sub[0] = [block[0,0],block[0,0],block[0,2],block[0,2]]
-        # second row, either half or no subsampled
-        if sample_ratio[2] == 2: block_sub[1] = [block[1,0],block[1,0],block[1,2],block[1,2]]
-        else: block_sub[1] = block_sub[0]
-
+        for m in range(2):
+            for n in range(0,4,2):
+                if(sample_ratio[2] == 2):
+                    sample = block[m,n]
+                else:
+                    sample = block[0,n]
+                block_sub[m,n] = block_sub[m,n+1] = sample
         return block_sub
 
     @staticmethod
