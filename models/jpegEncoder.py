@@ -319,11 +319,20 @@ class JPEGEncoder:
         Args: img_comp (np.array): 2-D image \n
         Returns: img_comp_block_list (np.array): list of 8 x 8 blocks
         """
+        if len(img_comp.shape) != 2:
+            raise ValueError("input image component must be a 2-D shape")
+        
+        h, w = img_comp.shape
 
-        img_comp_block_list = []
-        for i in range(img_comp.shape[0]):
-            img_comp_block_list.append(np.zeros((8,8), np.uint8))
-        return img_comp_block_list
+        # handle image padding
+        if h % 8 != 0 or w % 8 != 0:
+            img_comp_i = np.zeros(((h+(8-h%8)),(w+(8-w%8))), img_comp.dtype)
+        else: img_comp_i = img_comp
+
+        # img_comp_block_list = []
+        # for i in range(img_comp.shape[0]):
+        #     img_comp_block_list.append(np.zeros((8,8), np.uint8))
+        return img_comp_i
     
     def encode_blocks(self, img_comp_blocks: list):
         """

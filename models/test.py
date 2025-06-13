@@ -81,6 +81,12 @@ class TestChromaSubSampleMethod(unittest.TestCase):
             for n in range(0,width,4):
                 self.check_420_block(rand_img[m:m+2, n:n+4],img_res[m:m+2, n:n+4])
 
+class TestDivideIntoBlocksMethod(unittest.TestCase):
+    def test_divide_into_blocks(self):
+         rand_img = np.random.randint(0,256,(11,7), np.uint8)
+         img_blocks = JPEGEncoder.divide_into_blocks(rand_img)
+         print(img_blocks.shape)
+
     
 if __name__ == '__main__':
     unittest.main()
