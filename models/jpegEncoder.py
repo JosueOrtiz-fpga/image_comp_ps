@@ -273,7 +273,47 @@ class JPEGEncoder:
             sample_ratio (tuple): 3 member tuple expressing sample ratio \n
         Returns: img_comp_sub(np.array): subsampled image
         """
-        return np.zeros(img_comp.shape, np.uint8)
+        if len(img_comp.shape) != 2:
+            raise ValueError("input image component must be a 2-D shape")
+        if img_comp.shape[0] % 4 != 0 or img_comp.shape[1] % 4 != 0:
+            raise ValueError("input image component must have dimensions divisble by 4")
+        
+        if sample_ratio == (4,4,4): return img_comp
+
+        height, width = img_comp.shape
+        img_comp_sub = np.zeros(img_comp.shape,img_comp.dtype)
+        for m in range(0,height,2):
+            for n in range(0,width,4):
+                for i in range(4):
+                    img_comp_sub[m,n+i] = img_comp[m,n+(2*int(i/2))]
+                    img_comp_sub[m+1,n+i] = img_comp
+                # second row handling
+                n + m
+                    
+        return img_comp_sub
+    
+    @staticmethod
+    def block_chroma_subsample(block:np.array, sample_ratio: tuple) -> np.array:
+        """
+        Applies chroma subsampling to a 2 x 4 YCbCr block of pixels
+        Parameters:
+            block(np.ndarray) : a 2 x 4 matrix of Y, Cb, or Cr components
+        Returns:
+            block_sub(np.ndarray): a subsampled 2 x 4 Y, Cb, or Cr block
+        """
+        if sample_ratio not in [(4,4,4), (4,2,2), (4,2,0)]:
+            raise ValueError("Only 4-4-4, 4-2-2, and 4-2-0 ratios are supported")
+        
+        if sample_ratio == (4,4,4): return block
+
+        block_sub = np.zeros((2,4),block.dtype)
+        # first row will only support half-subsampling
+        block_sub[0] = [block[0,0],block[0,0],block[0,2],block[0,2]]
+        # second row, either half or no subsampled
+        if sample_ratio[2] == 2: block_sub[1] = [block[1,0],block[1,0],block[1,2],block[1,2]]
+        else: block_sub[1] = block_sub[0]
+
+        return block_sub
 
     @staticmethod
     def divide_into_blocks(img_comp: np.array):

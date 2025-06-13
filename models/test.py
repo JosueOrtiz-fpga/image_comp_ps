@@ -37,6 +37,14 @@ class TestSplitImageMethod(unittest.TestCase):
          self.assertTrue(np.array_equal(rand_img[:,:,0],y_res))
          self.assertTrue(np.array_equal(rand_img[:,:,1],cb_res))
          self.assertTrue(np.array_equal(rand_img[:,:,2],cr_res))
+
+class TestChromaSubSampleMethod(unittest.TestCase):
+    def test_444(self):
+         rand_img_comp = np.random.randint(0,256,(2,4), np.uint8)
+         img_comp_res = JPEGEncoder.block_chroma_subsample(rand_img_comp,(4,2,0))
+         print(rand_img_comp)
+         print(img_comp_res)
+        #  self.assertTrue(np.array_equal(rand_img_comp[:,:,0],img_comp_res))
     
 if __name__ == '__main__':
     unittest.main()
