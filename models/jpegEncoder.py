@@ -284,12 +284,7 @@ class JPEGEncoder:
         img_comp_sub = np.zeros(img_comp.shape,img_comp.dtype)
         for m in range(0,height,2):
             for n in range(0,width,4):
-                for i in range(4):
-                    img_comp_sub[m,n+i] = img_comp[m,n+(2*int(i/2))]
-                    img_comp_sub[m+1,n+i] = img_comp
-                # second row handling
-                n + m
-                    
+                img_comp_sub[m:m+2,n:n+4] = JPEGEncoder.block_chroma_subsample(img_comp[m:m+2,n:n+4], sample_ratio)    
         return img_comp_sub
     
     @staticmethod
@@ -309,6 +304,7 @@ class JPEGEncoder:
         block_sub = np.zeros((2,4),block.dtype)
         for m in range(2):
             for n in range(0,4,2):
+                # second row will either be half sampled or not sampled at all
                 if(sample_ratio[2] == 2):
                     sample = block[m,n]
                 else:

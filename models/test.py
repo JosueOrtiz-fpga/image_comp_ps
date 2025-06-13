@@ -39,6 +39,16 @@ class TestSplitImageMethod(unittest.TestCase):
          self.assertTrue(np.array_equal(rand_img[:,:,2],cr_res))
 
 class TestChromaSubSampleMethod(unittest.TestCase):
+    def check_422_block(self,orig_block:np.array, res_block:np.array):
+        for m in range(2):
+            for n in range(0,4,2):
+                self.assertTrue(res_block[m,n] == res_block[m,n+1] == orig_block[m,n])
+
+    def check_420_block(self,orig_block:np.array, res_block:np.array):
+        for m in range(2):
+            for n in range(0,4,2):
+                self.assertTrue(res_block[m,n] == res_block[m,n+1] == orig_block[0,n])
+    
     def test_block_sub(self):
         rand_img_block = np.random.randint(0,256,(2,4), np.uint8)
         img_block_res = JPEGEncoder.block_chroma_subsample(rand_img_block,(4,4,4))
@@ -46,16 +56,31 @@ class TestChromaSubSampleMethod(unittest.TestCase):
 
         rand_img_block = np.random.randint(0,256,(2,4), np.uint8)
         img_block_res = JPEGEncoder.block_chroma_subsample(rand_img_block,(4,2,2))
-        for m in range(2):
-            for n in range(0,4,2):
-                self.assertTrue(img_block_res[m,n] == img_block_res[m,n+1] == rand_img_block[m,n])
+        self.check_422_block(rand_img_block, img_block_res)
 
         rand_img_block = np.random.randint(0,256,(2,4), np.uint8)
         img_block_res = JPEGEncoder.block_chroma_subsample(rand_img_block,(4,2,0))
-        for m in range(2):
-            for n in range(0,4,2):
-                self.assertTrue(img_block_res[m,n] == img_block_res[m,n+1] == rand_img_block[0,n])
+        self.check_420_block(rand_img_block, img_block_res)
+
+    def test_img_comp_sub(self):
+        rand_img = np.random.randint(0,256,(1024,512), np.uint8)
+        img_res = JPEGEncoder.chroma_subsample(rand_img,(4,4,4))
+        self.assertTrue(np.array_equal(rand_img, img_res))
+
+        rand_img = np.random.randint(0,256,(512,1024), np.uint8)
+        img_res = JPEGEncoder.chroma_subsample(rand_img,(4,2,2))
+        height, width = rand_img.shape
+        for m in range(0,height,2):
+            for n in range(0,width,4):
+                self.check_422_block(rand_img[m:m+2, n:n+4],img_res[m:m+2, n:n+4])
         
+        rand_img = np.random.randint(0,256,(256,128), np.uint8)
+        img_res = JPEGEncoder.chroma_subsample(rand_img,(4,2,0))
+        height, width = rand_img.shape
+        for m in range(0,height,2):
+            for n in range(0,width,4):
+                self.check_420_block(rand_img[m:m+2, n:n+4],img_res[m:m+2, n:n+4])
+
     
 if __name__ == '__main__':
     unittest.main()
