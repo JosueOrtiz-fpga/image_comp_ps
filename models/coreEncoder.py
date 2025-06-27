@@ -185,7 +185,8 @@ class CoreEncoder:
         block_dct_quant = self.quant(block_dct, block_type)
         block_dct_quant_zz = CoreEncoder.zigzag_scan(block_dct_quant)
         block_dct_quant_zz_rle = CoreEncoder.rle(block_dct_quant_zz)
-        return np.array(block).flatten("C")
+        block_dct_quant_zz_rle_huff = self.huffman_encode(block_dct_quant_zz_rle)
+        return np.zeros(64,block.dtype)
     
     @staticmethod
     def dct2(n:np.uint, block: np.array) -> np.array:
@@ -248,3 +249,19 @@ class CoreEncoder:
             if coef != 0:
                 rle_array.append((0,coef,math.log2(abs(coef))+1))
         return rle_array
+    
+    def huffman_encode(self, rle_array: np.array) -> np.array:
+        """
+        Encode DC and AC coefficients for an 8x8 block using Huffman Codes
+        
+        Assumes DC coefficient is in the form (coefVal, coefSizeBits)
+        Assumes AC coefficients is in the form (zeroRle, coefVal, coefSizeBits)
+
+        Args: rle_array (np.array): array of zero run-length-encoded DCT coefficients
+        Returns: huff_array (np.array): array of huffman codes: [(code0Val, code0SizeBits), 
+                                                                 (code1Val, code1SizeBits), ...]
+        """
+        huff_array = []
+        for rle in rle_array:
+            huff_array.append((0,0))
+        return huff_array
