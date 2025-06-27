@@ -22,6 +22,11 @@ class TestEncodeBlockMethod(unittest.TestCase):
         zero_block = np.random.randint(0,1,(8,8), np.uint8)
         block_enc = CoreEncoder.zigzag_scan(zero_block)
         self.assertTrue(np.array_equal(block_enc,np.zeros(64,np.uint8)))
+    def test_rle(self):
+        ones_block = np.random.randint(1,2,4, np.uint8)
+        block_enc = CoreEncoder.rle(ones_block)
+        block_exp = [(0,1,1), (0,1,1), (0,1,1), (0,1,1)]
+        self.assertTrue(np.array_equal(block_enc,block_exp))
 
 if __name__== "__main__":
     unittest.main()

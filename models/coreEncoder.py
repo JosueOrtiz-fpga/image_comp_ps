@@ -1,5 +1,6 @@
 import numpy as np
 from enum import Enum
+import math
 #---------------
 # Constants
 
@@ -182,7 +183,8 @@ class CoreEncoder:
         
         block_dct = CoreEncoder.dct2(8, block)
         block_dct_quant = self.quant(block_dct, block_type)
-        block_dct_quant_zz = self.zigzag_scan(block_dct_quant)
+        block_dct_quant_zz = CoreEncoder.zigzag_scan(block_dct_quant)
+        block_dct_quant_zz_rle = CoreEncoder.rle(block_dct_quant_zz)
         return np.array(block).flatten("C")
     
     @staticmethod
@@ -231,4 +233,18 @@ class CoreEncoder:
             [35,36,48,49,57,58,62,63]
             ]).flatten("C")
         return block.flatten("C")[index_order]
-        
+    
+    @staticmethod
+    def rle(coef_array: np.array) -> np.array:
+        """
+        Diff Pulse Mod Encode for DCT DC components
+        Zero Run Length Encode for DCT AC components
+        Args: coef_array (np.array): array of DCT coefficients
+        Returns: rle_array (np.array): [dc_diff_code, (zeroRle, coef0Val, coef0SizeBits), 
+                                        (zeroRle, coef1Val, coef1SizeBits), ...]
+        """
+        rle_array = []
+        for coef in coef_array:
+            if coef != 0:
+                rle_array.append((0,coef,math.log2(abs(coef))+1))
+        return rle_array
